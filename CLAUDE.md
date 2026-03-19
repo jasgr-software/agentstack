@@ -9,7 +9,7 @@ A collection of markdown templates and setup scripts that define a structured mu
 ## Repo structure
 
 - `agent-stack.md` — the core workflow engine (upstream-managed, copied to `.claude/` in target projects)
-- `agents/overwatch.md` — read-only auditor agent definition (upstream-managed)
+- `agents/*.md` — agent role definitions: RA, SA, Developer, SDET, Overwatch (all upstream-managed)
 - `templates/` — project-managed templates (CLAUDE.md, task/bug/ADR/C4/TENETS/SRS templates, PROGRESS.md)
 - `examples/` — filled-in example showing what a configured project looks like
 - `setup.sh` / `setup.ps1` — setup and upgrade scripts

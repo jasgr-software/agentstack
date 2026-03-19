@@ -23,6 +23,10 @@ $Target = (Resolve-Path $Target).Path
 $UpstreamFiles = @(
     @{ Src = "agent-stack.md";                   Dest = ".claude/agent-stack.md" },
     @{ Src = "agents/overwatch.md";              Dest = "agents/overwatch.md" },
+    @{ Src = "agents/ra.md";                     Dest = "agents/ra.md" },
+    @{ Src = "agents/sa.md";                     Dest = "agents/sa.md" },
+    @{ Src = "agents/developer.md";              Dest = "agents/developer.md" },
+    @{ Src = "agents/sdet.md";                   Dest = "agents/sdet.md" },
     @{ Src = "templates/TASK-TEMPLATE.md";       Dest = "docs/tasks/TASK-TEMPLATE.md" },
     @{ Src = "templates/BUG-TEMPLATE.md";        Dest = "docs/tasks/BUG-TEMPLATE.md" }
 )

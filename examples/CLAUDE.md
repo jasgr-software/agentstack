@@ -22,19 +22,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Main Session Rules
 
-All agents must read `.claude/agent-stack.md` before starting work. The SA must include this instruction in every subagent spawn prompt: *"Read `.claude/agent-stack.md` first for workflow rules."*
+All agents must read `.claude/agent-stack.md` before starting work. Agent role definitions are in `agents/*.md` — each agent file contains the role's identity, tool restrictions, and operational procedures.
 
 ## Agent Team
 
-| Role | Model | Tech Stack | Assigned Directories | Role Tag |
-|------|-------|------------|---------------------|----------|
-| **Requirements Analyst (RA)** | Sonnet 4.6 | — | `docs/requirements/` | `[ra]` |
-| **System Architect (SA)** | Opus 4.6 | — | `CLAUDE.md`, `docs/tasks/`, `docs/architecture/`, `docs/decisions/` | `[sa]` |
-| **Backend Developer** | Sonnet 4.6 | Go, PostgreSQL, sqlc, Chi | `apps/api/`, `db/` | `[backend]` |
-| **Frontend Developer** | Sonnet 4.6 | Next.js 15, React, Tailwind, Zustand | `apps/web/` | `[frontend]` |
-| **DevOps Engineer** | Sonnet 4.6 | Terraform, GitHub Actions, Docker | `infra/`, `.github/workflows/`, `Dockerfile*` | `[devops]` |
-| **SDET / Validator** | Sonnet 4.6 | — | — | `[sdet]` |
-| **Overwatch** | Sonnet 4.6 | — | Read-only | `[overwatch]` |
+| Role | Agent File | Model | Tech Stack | Assigned Directories | Role Tag |
+|------|-----------|-------|------------|---------------------|----------|
+| **Requirements Analyst (RA)** | `agents/ra.md` | Sonnet 4.6 | — | `docs/requirements/` | `[ra]` |
+| **System Architect (SA)** | `agents/sa.md` | Opus 4.6 | — | `CLAUDE.md`, `docs/tasks/`, `docs/architecture/`, `docs/decisions/` | `[sa]` |
+| **Backend Developer** | `agents/developer.md` | Sonnet 4.6 | Go, PostgreSQL, sqlc, Chi | `apps/api/`, `db/` | `[backend]` |
+| **Frontend Developer** | `agents/developer.md` | Sonnet 4.6 | Next.js 15, React, Tailwind, Zustand | `apps/web/` | `[frontend]` |
+| **DevOps Engineer** | `agents/developer.md` | Sonnet 4.6 | Terraform, GitHub Actions, Docker | `infra/`, `.github/workflows/`, `Dockerfile*` | `[devops]` |
+| **SDET / Validator** | `agents/sdet.md` | Sonnet 4.6 | — | — | `[sdet]` |
+| **Overwatch** | `agents/overwatch.md` | Sonnet 4.6 | — | Read-only | `[overwatch]` |
 
 ### Submission Gate Commands
 
@@ -100,6 +100,8 @@ make migrate-create NAME=xxx   # Create new migration
 
 ## Key Documentation
 
+- `.claude/agent-stack.md` — multi-agent workflow engine
+- `agents/*.md` — agent role definitions (RA, SA, Developer, SDET, Overwatch)
 - `docs/architecture/C4.md` — C4 architecture model (SA updates after each epic)
 - `docs/architecture/TENETS.md` — architectural tenets
 - `docs/requirements/SRS.md` — Software Requirements Specification

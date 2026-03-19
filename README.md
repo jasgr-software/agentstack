@@ -24,6 +24,10 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 | File | Purpose |
 |------|---------|
 | `agent-stack.md` | The workflow engine — roles, task pipeline, SA phases, escalation protocol, git rules. Copied to `.claude/agent-stack.md` in your project. |
+| `agents/ra.md` | Requirements Analyst agent — owns the SRS, defines epics, validates completed work |
+| `agents/sa.md` | System Architect agent — autonomous orchestrator, drives epic execution |
+| `agents/developer.md` | Developer agent template — generic, spawned by SA with a specific role tag and task |
+| `agents/sdet.md` | SDET / Validator agent — reviews code, runs tests independently, approves or rejects |
 | `agents/overwatch.md` | Read-only auditor agent that monitors for rule violations and scope creep |
 | `templates/CLAUDE.md` | Skeleton project CLAUDE.md with TODO placeholders for your stack |
 | `templates/TASK-TEMPLATE.md` | Task file template used by the SA when breaking down epics |
@@ -61,8 +65,12 @@ TARGET=/path/to/your/project
 mkdir -p "$TARGET/.claude"
 cp agent-stack.md "$TARGET/.claude/agent-stack.md"
 
-# Overwatch agent
+# Agent files
 mkdir -p "$TARGET/agents"
+cp agents/ra.md "$TARGET/agents/ra.md"
+cp agents/sa.md "$TARGET/agents/sa.md"
+cp agents/developer.md "$TARGET/agents/developer.md"
+cp agents/sdet.md "$TARGET/agents/sdet.md"
 cp agents/overwatch.md "$TARGET/agents/overwatch.md"
 
 # Task and bug templates
@@ -110,7 +118,7 @@ The scripts distinguish between two categories of files:
 
 | Category | Files | On upgrade |
 |----------|-------|-----------|
-| **Upstream-managed** | `.claude/agent-stack.md`, `agents/overwatch.md`, `docs/tasks/TASK-TEMPLATE.md`, `docs/tasks/BUG-TEMPLATE.md` | Always updated to latest |
+| **Upstream-managed** | `.claude/agent-stack.md`, `agents/*.md` (all agent files), `docs/tasks/TASK-TEMPLATE.md`, `docs/tasks/BUG-TEMPLATE.md` | Always updated to latest |
 | **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md` | Never overwritten (your project config) |
 
 The output tells you what happened to each file:
@@ -291,6 +299,10 @@ your-project/
 ├── .claude/
 │   └── agent-stack.md                 # Workflow engine (upstream-managed)
 ├── agents/
+│   ├── ra.md                          # Requirements Analyst (upstream-managed)
+│   ├── sa.md                          # System Architect (upstream-managed)
+│   ├── developer.md                   # Developer template (upstream-managed)
+│   ├── sdet.md                        # SDET / Validator (upstream-managed)
 │   └── overwatch.md                   # Auditor agent (upstream-managed)
 └── docs/
     ├── architecture/

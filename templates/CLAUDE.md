@@ -11,21 +11,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 <!-- The .claude/agent-stack.md file defines the standard main session rules.
      Add any project-specific overrides or additions below. -->
 
-All agents must read `.claude/agent-stack.md` before starting work. The SA must include this instruction in every subagent spawn prompt: *"Read `.claude/agent-stack.md` first for workflow rules."*
+All agents must read `.claude/agent-stack.md` before starting work. Agent role definitions are in `agents/*.md` — each agent file contains the role's identity, tool restrictions, and operational procedures.
 
 ## Agent Team
 
 <!-- TODO: Map generic agent roles to your project's tech stacks and directories.
-     Define as many developer roles as your project needs. -->
+     Define as many developer roles as your project needs.
+     The Agent File column shows the agent definition used for each role.
+     All developer roles share agents/developer.md — the SA's spawn prompt sets the role tag. -->
 
-| Role | Model | Tech Stack | Assigned Directories | Role Tag |
-|------|-------|------------|---------------------|----------|
-| **Requirements Analyst (RA)** | Sonnet 4.6 | — | `docs/requirements/` | `[ra]` |
-| **System Architect (SA)** | Opus 4.6 | — | `CLAUDE.md`, `docs/tasks/`, `docs/architecture/`, `docs/decisions/` | `[sa]` |
-| **TODO: Developer 1** | Sonnet 4.6 | <!-- e.g. ASP.NET, Python, Go --> | <!-- e.g. apps/api/ --> | `[TODO-tag]` |
-| **TODO: Developer 2** | Sonnet 4.6 | <!-- e.g. Next.js, React --> | <!-- e.g. apps/web/ --> | `[TODO-tag]` |
-| **SDET / Validator** | Sonnet 4.6 | — | — | `[sdet]` |
-| **Overwatch** | Sonnet 4.6 | — | Read-only | `[overwatch]` |
+| Role | Agent File | Model | Tech Stack | Assigned Directories | Role Tag |
+|------|-----------|-------|------------|---------------------|----------|
+| **Requirements Analyst (RA)** | `agents/ra.md` | Sonnet 4.6 | — | `docs/requirements/` | `[ra]` |
+| **System Architect (SA)** | `agents/sa.md` | Opus 4.6 | — | `CLAUDE.md`, `docs/tasks/`, `docs/architecture/`, `docs/decisions/` | `[sa]` |
+| **TODO: Developer 1** | `agents/developer.md` | Sonnet 4.6 | <!-- e.g. ASP.NET, Python, Go --> | <!-- e.g. apps/api/ --> | `[TODO-tag]` |
+| **TODO: Developer 2** | `agents/developer.md` | Sonnet 4.6 | <!-- e.g. Next.js, React --> | <!-- e.g. apps/web/ --> | `[TODO-tag]` |
+| **SDET / Validator** | `agents/sdet.md` | Sonnet 4.6 | — | — | `[sdet]` |
+| **Overwatch** | `agents/overwatch.md` | Sonnet 4.6 | — | Read-only | `[overwatch]` |
 
 ### Submission Gate Commands
 
@@ -70,6 +72,7 @@ Before marking any task as `review`, the developer agent **must** pass:
 <!-- TODO: List important docs that agents should reference -->
 
 - `.claude/agent-stack.md` — multi-agent workflow engine
+- `agents/*.md` — agent role definitions (RA, SA, Developer, SDET, Overwatch)
 - `docs/architecture/C4.md` — C4 architecture model (SA updates after each epic)
 - `docs/architecture/TENETS.md` — architectural tenets
 - `docs/requirements/SRS.md` — Software Requirements Specification

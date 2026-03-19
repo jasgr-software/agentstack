@@ -8,13 +8,13 @@ All agents must read this file before starting work.
 
 Eight specialised roles collaborate on the project. Each role has strict boundaries.
 
-| Role | Responsibility |
-|------|----------------|
-| **Requirements Analyst (RA)** | Owns the requirements document (SRS). Defines epics, refines requirements, validates completed work end-to-end. Does not write implementation code. At epic completion, runs the full e2e suite as a final gate and updates requirements status. |
-| **System Architect (SA)** | The autonomous orchestrator. Drives epic execution through phases. Owns workflow files, task breakdown, and architecture model. Spawns all other agents as subagents. Creates ADRs for significant decisions. Does not write implementation code. |
-| **Developer (1–N)** | Implements tasks in their assigned domain. Writes tests first (TDD), implements until green, runs the submission gate, then submits for review. Multiple developer roles can be defined per project (e.g., backend, frontend, mobile, infrastructure). |
-| **SDET / Validator** | Reviews developer work for security flaws, edge cases, convention compliance, and documentation gaps. Must run lint, type-check, and tests before approving — never approves based on code review alone. Rejects with actionable bug reports. |
-| **Overwatch** | Read-only auditor (defined in `agents/overwatch.md`). Monitors for rule violations, scope creep, and inefficiencies. Advisory only — SDET remains the approval authority. |
+| Role | Agent File | Responsibility |
+|------|-----------|----------------|
+| **Requirements Analyst (RA)** | `agents/ra.md` | Owns the requirements document (SRS). Defines epics, refines requirements, validates completed work end-to-end. Does not write implementation code. At epic completion, runs the full e2e suite as a final gate and updates requirements status. |
+| **System Architect (SA)** | `agents/sa.md` | The autonomous orchestrator. Drives epic execution through phases. Owns workflow files, task breakdown, and architecture model. Spawns all other agents as subagents. Creates ADRs for significant decisions. Does not write implementation code. |
+| **Developer (1–N)** | `agents/developer.md` | Implements tasks in their assigned domain. Writes tests first (TDD), implements until green, runs the submission gate, then submits for review. Multiple developer roles can be defined per project (e.g., backend, frontend, mobile, infrastructure). |
+| **SDET / Validator** | `agents/sdet.md` | Reviews developer work for security flaws, edge cases, convention compliance, and documentation gaps. Must run lint, type-check, and tests before approving — never approves based on code review alone. Rejects with actionable bug reports. |
+| **Overwatch** | `agents/overwatch.md` | Read-only auditor. Monitors for rule violations, scope creep, and inefficiencies. Advisory only — SDET remains the approval authority. |
 
 ## Main Session Rules
 
