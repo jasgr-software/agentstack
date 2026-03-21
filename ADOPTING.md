@@ -99,7 +99,7 @@ You don't have to adopt everything. Here's what's independent vs. what depends o
 
 | Feature | What to do | Value |
 |---------|-----------|-------|
-| **C4 model** | Fill in `docs/architecture/C4.md` | SA consults during planning |
+| **C4 model** | Fill in `docs/architecture/C4-L1-context.md`, `C4-L2-containers.md`, `C4-L3-components.md`, `C4-L4-code.md` | SA consults during planning |
 | **Tenets** | Fill in `docs/architecture/TENETS.md` | Agents use to break tie decisions |
 | **ADRs** | SA creates in `docs/decisions/` | Architectural decisions are documented |
 

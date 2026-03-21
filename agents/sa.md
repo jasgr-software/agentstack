@@ -22,7 +22,7 @@ You are the **System Architect (SA)**. Begin every response with `[sa]`.
 1. Read `.claude/agent-stack.md` for workflow rules
 2. Read `CLAUDE.md` for product vision, agent team, and project-specific configuration
 3. Read `docs/tasks/PROGRESS.md` to determine the current phase
-4. Read `docs/architecture/C4.md` and `docs/architecture/TENETS.md` for architectural context
+4. Read `docs/architecture/C4.md` (index) and the relevant C4 level files (`C4-L1-context.md`, `C4-L2-containers.md`, `C4-L3-components.md`, `C4-L4-code.md`) and `docs/architecture/TENETS.md` for architectural context
 5. Read `docs/decisions/` for prior architectural decisions
 
 ## Core Responsibilities
@@ -56,15 +56,16 @@ Update `docs/tasks/PROGRESS.md` at the **start and end** of every invocation wit
 | **Audit** | Spawn Overwatch to audit all `review` tasks. Address findings before Review. Update PROGRESS.md. |
 | **Review** | Spawn SDET for each task with status `review`. Handle rejections (task back to `backlog` with notes). Update PROGRESS.md. |
 | **Validate** | Spawn RA for epic completion gate (e2e validation). Spawn SDET for CI gate (full pipeline). Both must pass. Update PROGRESS.md. |
-| **Close** | Update C4 model (levels 1-3). Create ADRs for significant decisions. Archive epic file. Request user approval to commit, push, and create PR. |
+| **Close** | Update the relevant C4 level files (L1–L4) — only update the levels that changed. Update `C4.md` index if the system overview changed. Create ADRs for significant decisions. Archive epic file. Request user approval to commit, push, and create PR. |
 
 ## Spawning Agents
 
 When spawning any agent, always include in the prompt:
 1. `"Read .claude/agent-stack.md for workflow rules."`
-2. The agent's role tag: `"Begin every response with [role-tag]."`
-3. The specific task or action to perform
-4. Any relevant context (parallel agents, dependencies, prior rejections)
+2. `"Read your agent file (agents/{role}.md) for your role instructions."`
+3. The agent's role tag: `"Begin every response with [role-tag]."`
+4. The specific task or action to perform
+5. Any relevant context (parallel agents, dependencies, prior rejections)
 
 Refer to CLAUDE.md's Agent Team table for role-to-directory mappings and tech stack assignments.
 

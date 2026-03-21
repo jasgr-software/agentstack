@@ -53,6 +53,8 @@ Epics are standalone files (`docs/requirements/ep-NNN-name.md`) — scoped slice
 - Lists acceptance criteria (not user stories — define requirements directly)
 - Is small enough to complete in one feature branch
 
+**Epic splitting:** If an epic grows too large for a single feature branch (too many acceptance criteria, too many cross-cutting tasks), split it into smaller epics using sequential numbering (e.g., `ep-005-auth-registration.md`, `ep-006-auth-login.md`) or letter suffixes (e.g., `ep-005a-auth-registration.md`, `ep-005b-auth-login.md`). Each smaller epic must be independently completable in one branch. Prefer splitting early during definition over discovering the epic is too large mid-execution.
+
 ## Validation Gate (epic completion)
 
 When the SA invokes you for epic validation:

@@ -32,7 +32,7 @@ The main Claude Code session (not an agent) follows these rules:
 docs/tasks/ (active) → docs/tasks/done/ (completed)
 ```
 
-Task files are named `TASK-NNN-short-description.md` and created by the SA in `docs/tasks/`. Bug reports use `BUG-NNN-short-description.md` and follow the same pipeline. The **Status** field tracks progress: `backlog`, `in-progress`, `review`, `done`. The **Assigned to** field specifies the developer agent role.
+Task files are named `TASK-EEE-NNN-short-description.md` where `EEE` is the epic number and `NNN` is the task sequence within the epic (e.g., `TASK-001-003-provider-repository.md`). Bug reports use `BUG-EEE-NNN-short-description.md` and follow the same pipeline. Bugs discovered during the Validate phase or ad-hoc testing that don't tie to a single epic use `BUG-000-NNN-description.md` (epic zero = cross-cutting). The **Status** field tracks progress: `backlog`, `in-progress`, `review`, `done`. The **Assigned to** field specifies the developer agent role.
 
 All tasks and bugs live in `docs/tasks/` while active. When they reach `done`, they are moved to `docs/tasks/done/`. Status changes are tracked by updating the **Status** field in the file.
 
@@ -87,7 +87,7 @@ Execution phase:     User → SA (drives the entire epic autonomously)
 
 Both the **RA** and **SA** are invoked directly by the user (not as subagents). This allows them to spawn other agents as subagents.
 
-**Agent identification (mandatory):** Every agent spawn prompt **must** include the self-identification instruction: *"You are the **{role name}**. Begin every response with `[{role-tag}]`."* Developer agents must update task files (Status, Updated-by, Work Log). SA, RA, and SDET must update `docs/tasks/PROGRESS.md`.
+**Agent identification (mandatory):** Every agent spawn prompt **must** include: (1) the instruction to read `.claude/agent-stack.md` for workflow rules, (2) the instruction to read their agent file (`agents/{role}.md`) for role instructions, and (3) the self-identification instruction: *"You are the **{role name}**. Begin every response with `[{role-tag}]`."* Developer agents must update task files (Status, Updated-by, Work Log). SA, RA, and SDET must update `docs/tasks/PROGRESS.md`.
 
 ## SA Phases
 
@@ -126,7 +126,7 @@ When invoked, the SA reads PROGRESS.md to determine the current phase and acts a
 3. Push to GitHub and create a PR (squash merge to `main`)
 4. Delete the branch after merge
 
-One branch per epic or logical unit of work. No long-lived branches spanning multiple epics.
+One branch per epic or logical unit of work. No long-lived branches spanning multiple epics. If an epic is too large for a single branch, the RA should split it into smaller epics before the SA begins the Plan phase.
 
 ## Ambiguity During Implementation
 

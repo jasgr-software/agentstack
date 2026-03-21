@@ -33,7 +33,11 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 | `templates/TASK-TEMPLATE.md` | Task file template used by the SA when breaking down epics |
 | `templates/BUG-TEMPLATE.md` | Bug report template used by the SDET when rejecting tasks |
 | `templates/PROGRESS.md` | Shared progress tracker for SA, RA, and SDET |
-| `templates/C4.md` | C4 architecture model template (Levels 1–3) |
+| `templates/C4.md` | C4 architecture model index — links to the four level files |
+| `templates/C4-L1-context.md` | System context — actors, external systems |
+| `templates/C4-L2-containers.md` | Containers — deployable units, technologies, relationships |
+| `templates/C4-L3-components.md` | Components — internal structure of each container |
+| `templates/C4-L4-code.md` | Code conventions — patterns, project structure (developer reference) |
 | `templates/TENETS.md` | Architectural tenets template |
 | `templates/SRS.md` | Software Requirements Specification template |
 | `templates/ADR-TEMPLATE.md` | Architecture Decision Record template |
@@ -81,6 +85,10 @@ cp templates/BUG-TEMPLATE.md "$TARGET/docs/tasks/BUG-TEMPLATE.md"
 # Architecture templates
 mkdir -p "$TARGET/docs/architecture"
 cp templates/C4.md "$TARGET/docs/architecture/C4.md"
+cp templates/C4-L1-context.md "$TARGET/docs/architecture/C4-L1-context.md"
+cp templates/C4-L2-containers.md "$TARGET/docs/architecture/C4-L2-containers.md"
+cp templates/C4-L3-components.md "$TARGET/docs/architecture/C4-L3-components.md"
+cp templates/C4-L4-code.md "$TARGET/docs/architecture/C4-L4-code.md"
 cp templates/TENETS.md "$TARGET/docs/architecture/TENETS.md"
 
 # Requirements
@@ -119,7 +127,7 @@ The scripts distinguish between two categories of files:
 | Category | Files | On upgrade |
 |----------|-------|-----------|
 | **Upstream-managed** | `.claude/agent-stack.md`, `agents/*.md` (all agent files), `docs/tasks/TASK-TEMPLATE.md`, `docs/tasks/BUG-TEMPLATE.md` | Always updated to latest |
-| **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md` | Never overwritten (your project config) |
+| **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4.md`, `docs/architecture/C4-L1-context.md`, `docs/architecture/C4-L2-containers.md`, `docs/architecture/C4-L3-components.md`, `docs/architecture/C4-L4-code.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md` | Never overwritten (your project config) |
 
 The output tells you what happened to each file:
 - `+` new file created
@@ -176,13 +184,14 @@ Edit `docs/architecture/TENETS.md`. Tenets are the principles agents use to brea
 
 ### Step 4: Sketch your initial architecture
 
-Edit `docs/architecture/C4.md`. You don't need a complete model — just enough to get started:
+Edit the C4 level files in `docs/architecture/`. You don't need a complete model — just enough to get started:
 
-- **Level 1** (System Context): What is the system? Who uses it? What external systems does it talk to?
-- **Level 2** (Container): What are the deployable units? (API, web app, database, etc.)
-- **Level 3** (Component): Leave mostly empty — the SA will fill this in as epics are implemented.
+- **L1** (`C4-L1-context.md`): What is the system? Who uses it? What external systems does it talk to?
+- **L2** (`C4-L2-containers.md`): What are the deployable units? (API, web app, database, etc.)
+- **L3** (`C4-L3-components.md`): Leave mostly empty — the SA will fill this in as epics are implemented.
+- **L4** (`C4-L4-code.md`): Leave empty initially — the SA populates this as code conventions emerge.
 
-The SA updates the C4 model after each epic, so it grows organically.
+The SA updates the relevant C4 level files after each epic, so the model grows organically. Each level is a separate file so agents read only what they need.
 
 ### Step 5: Define requirements
 
@@ -306,7 +315,11 @@ your-project/
 │   └── overwatch.md                   # Auditor agent (upstream-managed)
 └── docs/
     ├── architecture/
-    │   ├── C4.md                      # C4 architecture model
+    │   ├── C4.md                      # C4 model index
+    │   ├── C4-L1-context.md           # System context — actors, external systems
+    │   ├── C4-L2-containers.md        # Containers — deployable units, relationships
+    │   ├── C4-L3-components.md        # Components — internal structure per container
+    │   ├── C4-L4-code.md              # Code conventions — patterns, project structure
     │   └── TENETS.md                  # Architectural tenets
     ├── decisions/
     │   └── ADR-TEMPLATE.md            # Template for new ADRs
@@ -318,7 +331,7 @@ your-project/
         ├── TASK-TEMPLATE.md           # Template for new tasks
         ├── BUG-TEMPLATE.md            # Template for bug reports
         ├── PROGRESS.md                # SA/RA/SDET progress tracker
-        ├── TASK-001-some-task.md      # (created by SA during Plan)
+        ├── TASK-001-001-some-task.md   # (created by SA during Plan)
         └── done/                      # Completed tasks move here
 ```
 
