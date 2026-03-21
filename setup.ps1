@@ -36,6 +36,10 @@ $ProjectFiles = @(
     @{ Src = "templates/CLAUDE.md";              Dest = "CLAUDE.md" },
     @{ Src = "templates/PROGRESS.md";            Dest = "docs/tasks/PROGRESS.md" },
     @{ Src = "templates/C4.md";                  Dest = "docs/architecture/C4.md" },
+    @{ Src = "templates/C4-L1-context.md";       Dest = "docs/architecture/C4-L1-context.md" },
+    @{ Src = "templates/C4-L2-containers.md";    Dest = "docs/architecture/C4-L2-containers.md" },
+    @{ Src = "templates/C4-L3-components.md";    Dest = "docs/architecture/C4-L3-components.md" },
+    @{ Src = "templates/C4-L4-code.md";          Dest = "docs/architecture/C4-L4-code.md" },
     @{ Src = "templates/TENETS.md";              Dest = "docs/architecture/TENETS.md" },
     @{ Src = "templates/SRS.md";                 Dest = "docs/requirements/SRS.md" },
     @{ Src = "templates/ADR-TEMPLATE.md";        Dest = "docs/decisions/ADR-TEMPLATE.md" }
@@ -151,5 +155,5 @@ Write-Host ""
 Write-Host "Done! Next steps:"
 Write-Host "  1. Edit CLAUDE.md - fill in product vision, agent team, and commands"
 Write-Host "  2. Edit docs/architecture/TENETS.md - define your architectural tenets"
-Write-Host "  3. Edit docs/architecture/C4.md - sketch your initial architecture"
+Write-Host "  3. Edit docs/architecture/C4*.md - sketch your initial architecture (L1-L4)"
 Write-Host "  4. Start working: invoke the RA to define requirements, then the SA to execute"

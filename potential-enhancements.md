@@ -4,7 +4,7 @@ Improvements identified by comparing the agent stack template against a battle-t
 
 ---
 
-## 1. Agent file references in SA spawn prompts
+## ~~1. Agent file references in SA spawn prompts~~ — IMPLEMENTED
 
 **Priority:** Critical
 
@@ -50,7 +50,7 @@ Each specialized file includes:
 
 ---
 
-## 3. Epic-prefixed task and bug numbering
+## ~~3. Epic-prefixed task and bug numbering~~ — IMPLEMENTED
 
 **Priority:** High
 
@@ -64,7 +64,7 @@ Each specialized file includes:
 
 ---
 
-## 4. Split C4 into L1-L4 individual files
+## ~~4. Split C4 into L1-L4 individual files~~ — IMPLEMENTED
 
 **Priority:** High
 
@@ -110,7 +110,7 @@ Drop the root `C4.md` index file. Each level file stands on its own.
 
 ---
 
-## 6. Epic splitting guidance for the RA
+## ~~6. Epic splitting guidance for the RA~~ — IMPLEMENTED
 
 **Priority:** Medium
 

@@ -102,7 +102,11 @@ make migrate-create NAME=xxx   # Create new migration
 
 - `.claude/agent-stack.md` — multi-agent workflow engine
 - `agents/*.md` — agent role definitions (RA, SA, Developer, SDET, Overwatch)
-- `docs/architecture/C4.md` — C4 architecture model (SA updates after each epic)
+- `docs/architecture/C4.md` — C4 architecture model index (SA updates level files after each epic)
+- `docs/architecture/C4-L1-context.md` — system context, actors, external systems
+- `docs/architecture/C4-L2-containers.md` — containers, technologies, relationships
+- `docs/architecture/C4-L3-components.md` — component diagrams per container
+- `docs/architecture/C4-L4-code.md` — code conventions, patterns, project structure
 - `docs/architecture/TENETS.md` — architectural tenets
 - `docs/requirements/SRS.md` — Software Requirements Specification
 - `docs/requirements/ep-NNN-name.md` — epic requirements with acceptance criteria

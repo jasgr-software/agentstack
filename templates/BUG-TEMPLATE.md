@@ -1,6 +1,6 @@
-# BUG-NNN — Short Description
+# BUG-EEE-NNN — Short Description
 
-**Source task:** TASK-NNN
+**Source task:** TASK-EEE-NNN
 **Status:** backlog
 **Category:** <!-- security | edge-case | tenet-violation | test-coverage | code-quality | accessibility -->
 **Severity:** <!-- critical / major / minor -->
@@ -45,7 +45,7 @@
 ### [sdet] — YYYY-MM-DD
 
 **What was done:**
-- Created bug report during review of TASK-NNN
+- Created bug report during review of TASK-EEE-NNN
 
 **What's next:**
 - Assign to developer for fix
