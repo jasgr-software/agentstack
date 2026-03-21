@@ -2,14 +2,22 @@
 
 **Source task:** TASK-NNN
 **Status:** backlog
+**Category:** <!-- security | edge-case | tenet-violation | test-coverage | code-quality | accessibility -->
+**Severity:** <!-- critical / major / minor -->
+**Priority:** <!-- high / medium / low -->
 **Assigned to:** <!-- developer role tag that owns the fix -->
 **Updated-by:** [sdet]
-**Priority:** <!-- high / medium / low -->
-**Severity:** <!-- critical / major / minor -->
+
+---
 
 ## Bug Description
 
-<!-- What is wrong? Be specific — include the expected vs actual behavior -->
+<!-- What is wrong? Be specific — include the expected vs actual behavior. -->
+
+## Files Involved
+
+| File | Issue |
+|------|-------|
 
 ## Steps to Reproduce
 
@@ -29,6 +37,8 @@
 ## Suggested Fix
 
 <!-- Optional guidance for the developer -->
+
+---
 
 ## Work Log
 
