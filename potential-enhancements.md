@@ -1,6 +1,6 @@
 # Potential Enhancements
 
-Improvements identified by comparing the agent stack template against a battle-tested deployment (Journey for Jasmine — 9 epics, 160+ tasks, 12 ADRs, 12+ bugs resolved). Ranked by criticality.
+Improvements identified by comparing the agent stack template against a battle-tested production deployment. Ranked by criticality.
 
 ---
 
@@ -86,17 +86,18 @@ Drop the root `C4.md` index file. Each level file stands on its own.
 
 ## 5. Add optional DevOps role and operations doc templates
 
-**Priority:** High
+**Priority:** High — partially implemented
 
 **Current state:** The template has no infrastructure-specific role and no operations documentation. Projects deploying to cloud infrastructure must invent these from scratch.
 
-**Enhancement:**
+**Partially implemented (PR #4):** SDET now verifies operational doc consistency for infrastructure tasks. `templates/CLAUDE.md` includes a commented Infrastructure Documentation Consistency section. `agents/overwatch.md` already had an ops doc consistency check in Category 5.
+
+**Remaining work:**
 - Add `agents/devops.md` — a specialized developer agent for infrastructure work
 - Add `templates/operations/inventory.md` — tracks deployed resources, SKUs, regions, FQDNs
 - Add `templates/operations/runbook.md` — deployment procedures, rollback steps, troubleshooting
-- Update `agents/sdet.md` — add ops doc verification rule for infrastructure tasks
-- Update `agents/overwatch.md` — add ops doc consistency check
 - Update `templates/CLAUDE.md` — add DevOps row to Agent Team table
+- Update setup scripts to optionally add DevOps role
 
 **DevOps role boundaries:**
 - Assigned directories: `infra/`, `.github/workflows/`, `Dockerfile*`, `docker-compose.yml` (project fills in specifics)
@@ -105,7 +106,7 @@ Drop the root `C4.md` index file. Each level file stands on its own.
 
 **This is optional.** The setup script asks "Does your project have infrastructure?" and only adds the DevOps role and ops templates if yes.
 
-**Files affected:** New `agents/devops.md`, new `templates/operations/`, `agents/sdet.md`, `agents/overwatch.md`, `templates/CLAUDE.md`, `setup.sh`, `setup.ps1`
+**Files affected:** New `agents/devops.md`, new `templates/operations/`, `templates/CLAUDE.md`, `setup.sh`, `setup.ps1`
 
 ---
 
@@ -155,13 +156,9 @@ No separate template is needed — the epic file is the natural home for this.
 
 The following items need further design decisions before implementation.
 
-### Domain-specific hard submission gates
+### ~~Domain-specific hard submission gates~~ — IMPLEMENTED
 
-**Current state:** The submission gate is fixed: lint, type-check, tests, e2e (if required). Some domains need extra verification steps (e.g., data import against real sources, API contract validation).
-
-**Current approach:** Domain-specific gates are expressed in the task's Definition of Done. The SA writes them in, the developer follows them, the SDET checks the Work Log for evidence.
-
-**Future consideration:** A formal mechanism for additional hard submission gates that the SDET enforces beyond the standard pipeline — an `Extra-gate:` field in the task template with a command that must pass before the task can be marked as `review`.
+Implemented in PR #4. `agent-stack.md` now documents domain-specific gates as a formal pattern. `templates/CLAUDE.md` has a commented placeholder section with examples. The SDET enforces domain-specific gates defined in CLAUDE.md alongside standard gates.
 
 ### Architecture archive format
 

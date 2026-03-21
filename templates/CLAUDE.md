@@ -40,7 +40,21 @@ Before marking any task as `review`, the developer agent **must** pass:
 2. **Relevant tests**: `TODO: your test command(s)` for the changed code
 3. **Targeted e2e** (only when `E2e-required: yes`): `TODO: your e2e command`
 
-<!-- Add any project-specific additional gates below -->
+<!-- Add any domain-specific additional gates below. Examples:
+     - Data import tasks must run a real import against the local database before review
+     - Infrastructure tasks must update operational docs (inventory, runbooks) as part of the task
+     - API tasks must verify OpenAPI spec is consistent with implementation
+     Domain-specific gates catch integration issues that unit tests and lint cannot. -->
+
+### Infrastructure Documentation Consistency
+
+<!-- If your project has infrastructure-as-code (Terraform, Bicep, CloudFormation, etc.),
+     uncomment and configure the rules below. -->
+
+<!-- When a task changes infrastructure resources, secrets, or configuration, the developer
+     **must update operational documentation** (inventory, runbooks, deployment guides) as part
+     of the task. The SDET **must verify** that operational docs are consistent with infrastructure
+     code changes — reject if stale. -->
 
 ### Epic Completion Gates
 

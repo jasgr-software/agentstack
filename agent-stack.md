@@ -70,6 +70,10 @@ Before marking any task as `review`, the developer agent **must** pass:
 
 A task **must not** be marked `review` if any of these fail. A task with `E2e-required: yes` **must not** be marked `review` if Docker is unavailable — the e2e result is invalid without a running stack.
 
+**E2E execution proof requirement:** For any task with `E2e-required: yes`, the developer **must** include actual test execution output (pass/fail counts, test names) in the Work Log. "Tests written but not executed" or "Docker not available" is **not acceptable** — the developer must escalate to the SA, who will ask the user to start Docker. No e2e task may be submitted for review without execution proof.
+
+**Domain-specific gates:** Projects may define additional submission gates in `CLAUDE.md` for integration-heavy domains (e.g., "must run a real data import before review", "must update operational docs when changing infrastructure"). These are enforced alongside the standard gates above.
+
 > **Note:** The specific commands for each gate step are defined in your project's `CLAUDE.md` under "Submission Gate Commands."
 
 ## How to Invoke
@@ -89,7 +93,7 @@ Both the **RA** and **SA** are invoked directly by the user (not as subagents). 
 
 | Phase | What the SA does |
 |-------|-----------------|
-| **Plan** | Read epic requirements + architecture docs + tenets. **Docker pre-flight: run `docker info` — if Docker is unavailable, STOP and ask the user to start Docker before proceeding.** Create feature branch. Break epic into tasks in `docs/tasks/`. Update PROGRESS.md. |
+| **Plan** | **Context pre-flight: if starting a new epic, ask the user to run `/compact` to maximize context for the orchestration cycle.** Read epic requirements + architecture docs + tenets. **Docker pre-flight: run `docker info` — if Docker is unavailable, STOP and ask the user to start Docker before proceeding.** Create feature branch. Break epic into tasks in `docs/tasks/`. Update PROGRESS.md. |
 | **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks (in parallel where possible). Wait for completion. Update PROGRESS.md. |
 | **Audit** | Spawn Overwatch to audit all `review` tasks for rule compliance, scope creep, and inefficiencies. Address findings before Review. Update PROGRESS.md. |
 | **Review** | Spawn SDET for each task with status `review`. Handle rejections (task → `backlog` with notes). Update PROGRESS.md. |
