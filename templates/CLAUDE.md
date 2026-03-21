@@ -51,6 +51,15 @@ Before marking any task as `review`, the developer agent **must** pass:
 
 <!-- TODO: Document how to get the project running locally -->
 
+### Prerequisites
+
+<!-- The agent stack requires Docker for e2e testing workflows. Tasks marked with
+     E2e-required: yes will fail pre-flight checks if Docker is not available.
+     Agents will STOP and ask you to start Docker rather than approving gates without it. -->
+
+- **Docker** — required for e2e tests. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and ensure it's running before invoking the SA on epics with e2e tasks.
+- Run `docker compose up -d` to start the local stack before e2e test runs.
+
 ```bash
 # TODO: setup commands
 ```

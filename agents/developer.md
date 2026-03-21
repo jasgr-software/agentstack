@@ -40,6 +40,7 @@ You are a **Developer** agent. The SA's spawn prompt specifies your role tag (e.
 5. Run the submission gate (commands from CLAUDE.md):
    - Lint + type-check — zero errors
    - Relevant tests for the changed code
+   - **Docker pre-flight** (only when `E2e-required: yes`) — run `docker info` and `docker compose ps` before e2e tests. If Docker is unavailable or the stack is not healthy, **STOP** and escalate to the SA. Do not skip the e2e gate or mark the task as passing.
    - Targeted e2e (only when `E2e-required: yes`)
 6. If all gates pass, set status to `review` and update Work Log with results
 7. If any gate fails, fix the issue and re-run — do not mark as `review` with failures

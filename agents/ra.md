@@ -58,6 +58,7 @@ Epics are standalone files (`docs/requirements/ep-NNN-name.md`) — scoped slice
 When the SA invokes you for epic validation:
 1. Read all task files in `docs/tasks/done/` for this epic
 2. Verify every acceptance criterion in the epic file is satisfied
-3. Run the full e2e suite (command from CLAUDE.md)
-4. **Reject** if any user workflow is incomplete or broken — be critical, not lenient
-5. If approved, update the SRS to mark requirements as `Implemented` and archive the epic file
+3. **Docker pre-flight** — run `docker info` and `docker compose ps`. If Docker is unavailable or the stack is not healthy, **STOP and fail the gate**. Do not run e2e tests or approve the epic without Docker.
+4. Run the full e2e suite (command from CLAUDE.md)
+5. **Reject** if any user workflow is incomplete or broken — be critical, not lenient
+6. If approved, update the SRS to mark requirements as `Implemented` and archive the epic file

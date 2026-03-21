@@ -46,6 +46,7 @@ For each task with status `review`:
 4. **Run the submission gate commands** independently (from CLAUDE.md):
    - Lint + type-check — zero errors
    - Relevant tests for the changed code
+   - **Docker pre-flight** (when `E2e-required: yes`) — run `docker info` and `docker compose ps` before e2e tests. If Docker is unavailable or the stack is not healthy, **STOP and reject the task** — do not approve without a valid e2e run. Note Docker unavailability in the rejection.
    - Targeted e2e (when `E2e-required: yes`)
 5. If everything passes → approve, set task status to `done`
 6. If anything fails → reject, create a BUG file with:
@@ -72,9 +73,10 @@ Update `docs/tasks/PROGRESS.md` at the **start and end** of every invocation wit
 ## CI Gate (epic completion)
 
 When invoked for the CI gate during the Validate phase:
-1. Run the full CI command from CLAUDE.md (typically: lint, type-check, build, all test suites)
-2. Report pass/fail with full output
-3. If any step fails, report which step and the specific errors
+1. **Docker pre-flight** — run `docker info` and `docker compose ps`. If Docker is unavailable or the stack is not healthy, **STOP and fail the gate**. Do not proceed without Docker.
+2. Run the full CI command from CLAUDE.md (typically: lint, type-check, build, all test suites)
+3. Report pass/fail with full output
+4. If any step fails, report which step and the specific errors
 
 ## Parallel Agent Awareness
 

@@ -51,15 +51,24 @@ Agents must leave enough context to resume if a session is interrupted.
 
 This allows any agent (or the same agent in a new session) to pick up exactly where work left off.
 
+## Docker Pre-Flight
+
+**Any agent about to run e2e tests must first verify Docker is available.** Run `docker info` — if it fails, **STOP immediately** and report that Docker is unavailable. Do not run e2e tests, do not approve gates, do not mark tasks as passing. Ask the user to start Docker before proceeding.
+
+For tasks with `E2e-required: yes`, also run `docker compose ps` to verify the stack is healthy before executing e2e tests. If services are not running, **STOP** and ask the user to bring up the stack (`docker compose up -d`).
+
+**This is a hard gate — no exceptions.** An e2e pass without a running Docker stack is invalid.
+
 ## Submission Gate
 
 Before marking any task as `review`, the developer agent **must** pass:
 
 1. **Lint + type-check** — zero errors
 2. **Relevant tests** — unit/integration tests for the changed code
-3. **Targeted e2e** (only when `E2e-required: yes`) — end-to-end tests for the specific feature
+3. **Docker pre-flight** (only when `E2e-required: yes`) — verify Docker is available (`docker info`) and the stack is healthy (`docker compose ps`) before running any e2e tests
+4. **Targeted e2e** (only when `E2e-required: yes`) — end-to-end tests for the specific feature
 
-A task **must not** be marked `review` if any of these fail.
+A task **must not** be marked `review` if any of these fail. A task with `E2e-required: yes` **must not** be marked `review` if Docker is unavailable — the e2e result is invalid without a running stack.
 
 > **Note:** The specific commands for each gate step are defined in your project's `CLAUDE.md` under "Submission Gate Commands."
 
@@ -80,8 +89,8 @@ Both the **RA** and **SA** are invoked directly by the user (not as subagents). 
 
 | Phase | What the SA does |
 |-------|-----------------|
-| **Plan** | Read epic requirements + architecture docs + tenets. Create feature branch. Break epic into tasks in `docs/tasks/`. Update PROGRESS.md. |
-| **Dispatch** | Spawn developer agents for `backlog` tasks (in parallel where possible). Wait for completion. Update PROGRESS.md. |
+| **Plan** | Read epic requirements + architecture docs + tenets. **Docker pre-flight: run `docker info` — if Docker is unavailable, STOP and ask the user to start Docker before proceeding.** Create feature branch. Break epic into tasks in `docs/tasks/`. Update PROGRESS.md. |
+| **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks (in parallel where possible). Wait for completion. Update PROGRESS.md. |
 | **Audit** | Spawn Overwatch to audit all `review` tasks for rule compliance, scope creep, and inefficiencies. Address findings before Review. Update PROGRESS.md. |
 | **Review** | Spawn SDET for each task with status `review`. Handle rejections (task → `backlog` with notes). Update PROGRESS.md. |
 | **Validate** | Spawn RA for epic completion gate (e2e suite). Spawn SDET for CI gate. Update PROGRESS.md. |
@@ -100,6 +109,7 @@ When invoked, the SA reads PROGRESS.md to determine the current phase and acts a
 4. At **Close**, the SA requests user approval to commit, push, and create PR.
 
 **Epic completion gates** (during Validate phase):
+- **Docker pre-flight**: Before running either gate, verify Docker is available (`docker info`) and the stack is healthy (`docker compose ps`). If Docker is unavailable, **STOP** — do not run gates.
 - **RA gate**: Validates the completed epic satisfies requirements end-to-end — rejects if any user workflow is incomplete. Runs the full e2e suite. Updates requirements to mark as `Implemented`.
 - **CI gate**: SDET runs the full CI pipeline (lint → type-check → build → all test suites). The epic is not complete until both gates pass.
 
