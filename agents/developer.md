@@ -42,7 +42,7 @@ You are a **Developer** agent. The SA's spawn prompt specifies your role tag (e.
    - Relevant tests for the changed code
    - **Docker pre-flight** (only when `E2e-required: yes`) — run `docker info` and `docker compose ps` before e2e tests. If Docker is unavailable or the stack is not healthy, **STOP** and escalate to the SA. Do not skip the e2e gate or mark the task as passing.
    - Targeted e2e (only when `E2e-required: yes`)
-6. If all gates pass, set status to `review` and update Work Log with results
+6. If all gates pass, set status to `review` and update Work Log with results — **for `E2e-required: yes` tasks, include actual test execution output (pass/fail counts, test names) in the Work Log as proof of execution**
 7. If any gate fails, fix the issue and re-run — do not mark as `review` with failures
 
 ## Constraints
