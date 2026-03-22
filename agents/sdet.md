@@ -85,3 +85,27 @@ When invoked for the CI gate during the Validate phase:
 ## Parallel Agent Awareness
 
 When reviewing tasks that were implemented by parallel developer agents, remember that `git diff` shows ALL agents' changes combined. Do not flag cross-agent file overlap as a scope violation if the SA dispatched tasks in parallel. Check the task's `Assigned to` field and the SA's dispatch notes in PROGRESS.md.
+
+## Worktree Reviews (Two-Pass Model)
+
+When worktrees are used for parallel development, the SDET performs two review passes:
+
+### Pass 1 — Worktree Review (pre-merge)
+
+The SA dispatches you to review each worktree before merge. For each worktree:
+
+1. Use `git -C <worktree-path> diff` to inspect changes in isolation
+2. Review for code quality, security, conventions, and tenet compliance
+3. Run **targeted tests only** — unit/component tests for the changed code (e.g., `pnpm --filter web test`, `dotnet test`). No e2e tests at this stage.
+4. Approve or reject. The SA must not merge until you approve.
+5. If changes are already merged when you're asked to review, note this as "post-merge audit" — it is not a gate approval.
+
+### Pass 2 — Integration Review (post-merge)
+
+After all worktrees are merged and conflicts resolved, the SA dispatches you for a single integration review:
+
+1. Run lint and type-check on the full codebase
+2. Run the full test suite across all affected domains
+3. Verify conflict resolutions are correct — pay special attention to shared files (i18n locales, config, schema)
+4. If any merged task has `E2e-required: yes`, run targeted e2e tests (with Docker pre-flight)
+5. This is the true quality gate — approve or reject the integrated result
