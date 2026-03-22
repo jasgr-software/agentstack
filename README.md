@@ -2,6 +2,20 @@
 
 A structured multi-agent execution engine for Claude Code. It takes well-defined requirements and drives them to production-quality code by splitting work across specialised AI agents — architect, developers, reviewer, auditor — each with strict role boundaries, mandatory quality gates, and file-based memory that survives session interruptions. The workflow enforces TDD, submission gates, independent code review, and escalation protocols so that Claude Code operates with the same discipline as a well-run engineering team. Technology-agnostic: define your stack, commands, and directory structure in `CLAUDE.md` and the workflow adapts.
 
+## When to use this (and when not to)
+
+This stack is **not for every project.** Before adopting it, consider whether it fits your situation:
+
+1. **Don't use it for MVPs or rapid prototyping.** The full ceremony — RA, SA, developers, SDET, Overwatch, task files, PROGRESS.md, ADRs — adds real overhead. If you're hammering out a proof of concept or validating an idea quickly, this process will slow you down. Use it when you need production-quality output, not when you need speed.
+
+2. **Budget for tuning.** The agent stack is a framework, not a turnkey solution. The generic workflow rules in `agent-stack.md` won't get you far without a well-configured `CLAUDE.md` that defines your tech stack, submission gate commands, directory structure, and agent team mapping. Expect to invest time configuring and iterating on your project setup.
+
+3. **Be aware of context costs.** Every agent reads `agent-stack.md` + its own role file + `CLAUDE.md` + `PROGRESS.md` + task files + tenets + architecture docs before doing any work. That's a significant chunk of context consumed by instructions rather than actual code. For large, complex codebases, keep your `CLAUDE.md` concise — every unnecessary line costs you reasoning capacity.
+
+**Best fit:** Projects that genuinely need production quality — regulated domains, team handoffs, complex multi-service systems, or any codebase where untested code, skipped reviews, and lost context between sessions would be costly.
+
+**Not a fit:** Quick scripts, prototypes, exploratory work, or small projects where the process overhead exceeds the value of the guardrails.
+
 ## Design philosophy
 
 This workflow is opinionated about **process** but agnostic about **technology**. It doesn't care if you're building with Python, .NET, Go, or JavaScript. It cares that:

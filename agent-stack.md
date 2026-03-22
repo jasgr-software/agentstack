@@ -94,9 +94,9 @@ Both the **RA** and **SA** are invoked directly by the user (not as subagents). 
 | Phase | What the SA does |
 |-------|-----------------|
 | **Plan** | **Context pre-flight: if starting a new epic, ask the user to run `/compact` to maximize context for the orchestration cycle.** Read epic requirements + architecture docs + tenets. **Docker pre-flight: run `docker info` — if Docker is unavailable, STOP and ask the user to start Docker before proceeding.** Create feature branch. Break epic into tasks in `docs/tasks/`. Update PROGRESS.md. |
-| **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks (in parallel where possible). Wait for completion. Update PROGRESS.md. |
+| **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks (in parallel where possible). Wait for completion. **If worktrees were used:** dispatch SDET for Pass 1 (worktree review) per-worktree before merging. Merge approved worktrees, resolve conflicts. Update PROGRESS.md. |
 | **Audit** | Spawn Overwatch to audit all `review` tasks for rule compliance, scope creep, and inefficiencies. Address findings before Review. Update PROGRESS.md. |
-| **Review** | Spawn SDET for each task with status `review`. Handle rejections (task → `backlog` with notes). Update PROGRESS.md. |
+| **Review** | Spawn SDET for each task with status `review`. **If worktrees were used:** this is Pass 2 (integration review) — SDET reviews the merged result, runs full test suite, and validates conflict resolutions. Handle rejections (task → `backlog` with notes). Update PROGRESS.md. |
 | **Validate** | Spawn RA for epic completion gate (e2e suite). Spawn SDET for CI gate. Update PROGRESS.md. |
 | **Close** | Update architecture model, create ADRs, archive epic file, request user approval to commit/push/PR. |
 
@@ -127,6 +127,32 @@ When invoked, the SA reads PROGRESS.md to determine the current phase and acts a
 4. Delete the branch after merge
 
 One branch per epic or logical unit of work. No long-lived branches spanning multiple epics. If an epic is too large for a single branch, the RA should split it into smaller epics before the SA begins the Plan phase.
+
+### Worktree Development
+
+When developer agents use worktrees for parallel development, SDET review happens in **two passes**:
+
+#### Pass 1 — Worktree Review (pre-merge)
+
+Before merging any worktree into the epic branch, the SA dispatches the SDET to review each worktree in isolation:
+
+1. The SA provides the worktree path so the SDET can inspect it directly (e.g., `git -C .claude/worktrees/<agent-id> diff`).
+2. The SDET reviews for code quality, security, conventions, and tenet compliance.
+3. The SDET runs **targeted tests only** (unit/component tests for the changed code). No e2e tests — worktrees are isolated and don't have the full stack.
+4. The SA must not merge worktree changes until the SDET approves. If changes are already merged, the SDET notes this as "post-merge audit" rather than a gate approval.
+
+#### Pass 2 — Integration Review (post-merge)
+
+After all approved worktrees are merged and conflicts are resolved, the SA dispatches the SDET for a single integration review of the merged result:
+
+1. The SDET runs lint, type-check, and the full test suite on the integrated code.
+2. The SDET verifies conflict resolutions are correct (especially shared files like i18n, config, schema).
+3. If any task has `E2e-required: yes`, the SDET runs targeted e2e tests at this stage (with Docker pre-flight).
+4. This is the true quality gate — worktree review alone is not sufficient for merge to proceed to Validate.
+
+#### Conflict resolution
+
+If merging an approved worktree creates conflicts with another worktree's changes, the main session resolves conflicts and the integration review covers the resolution. No need to re-review the full task — just the conflict areas.
 
 ## Ambiguity During Implementation
 
