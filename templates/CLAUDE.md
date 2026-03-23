@@ -61,6 +61,37 @@ Before marking any task as `review`, the developer agent **must** pass:
 - **RA gate (e2e)**: `TODO: full e2e suite command`
 - **CI gate**: `TODO: full CI command` (lint → type-check → build → all test suites)
 
+## Role-Specific Rules
+
+<!-- Add project-specific constraints for individual agent roles here.
+     These survive agent stack upgrades (unlike changes to agents/*.md files).
+     Each agent reads CLAUDE.md on startup, so rules here are authoritative.
+     Only add sections for roles that need project-specific rules. -->
+
+<!-- ### Developer Rules -->
+<!-- Examples: -->
+<!-- - Use `pnpm --filter` for all package commands -->
+<!-- - Never use `cd` in shell commands — use the Bash tool's `cwd` parameter -->
+<!-- - Never use `sudo` — escalate to the SA instead -->
+<!-- - Use the Write tool to create files, not `cat` heredocs or `echo` redirection -->
+
+<!-- ### SDET Rules -->
+<!-- Examples: -->
+<!-- - Verify operations docs consistency when infrastructure code changes -->
+<!-- - Never use `cd` in shell commands — use the Bash tool's `cwd` parameter -->
+
+<!-- ### RA Rules -->
+<!-- Examples: -->
+<!-- - Read docs/requirements/observations.md for live product observations before starting any epic -->
+
+<!-- ### SA Rules -->
+<!-- Examples: -->
+<!-- - Check docs/architecture/staging-inventory.md before planning infrastructure tasks -->
+
+<!-- ### Overwatch Rules -->
+<!-- Examples: -->
+<!-- - Verify that infrastructure changes include updated staging-inventory.md and staging-runbook.md -->
+
 ## Local Development Setup
 
 <!-- TODO: Document how to get the project running locally -->

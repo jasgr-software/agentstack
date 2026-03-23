@@ -49,14 +49,11 @@ Update `docs/tasks/PROGRESS.md` at the **start and end** of every invocation wit
 
 ## Phases
 
-| Phase | Actions |
-|-------|---------|
-| **Plan** | **Context pre-flight: if starting a new epic, ask the user to run `/compact` to maximize context for the orchestration cycle.** Read epic requirements + SRS + C4 + tenets. **Docker pre-flight: run `docker info` — if Docker is unavailable, STOP and ask the user to start Docker Desktop before proceeding.** Create feature branch. Break epic into task files in `docs/tasks/`. Set `E2e-required: yes` on tasks touching auth flows, cookies, CORS, cross-service boundaries, or email. Update PROGRESS.md. |
-| **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks — in parallel where possible. Each spawn prompt must include: the task file path, the role tag, and the instruction to read `.claude/agent-stack.md`. Wait for completion. Update PROGRESS.md. |
-| **Audit** | Spawn Overwatch to audit all `review` tasks. Address findings before Review. Update PROGRESS.md. |
-| **Review** | Spawn SDET for each task with status `review`. Handle rejections (task back to `backlog` with notes). Update PROGRESS.md. |
-| **Validate** | Spawn RA for epic completion gate (e2e validation). Spawn SDET for CI gate (full pipeline). Both must pass. Update PROGRESS.md. |
-| **Close** | Update the relevant C4 level files (L1–L4) — only update the levels that changed. Update `C4.md` index if the system overview changed. Create ADRs for significant decisions. Archive epic file. Request user approval to commit, push, and create PR. |
+Follow the six-phase lifecycle defined in `agent-stack.md` (Plan → Dispatch → Audit → Review → Validate → Close). Key SA-specific details:
+
+- **Plan**: Set `E2e-required: yes` on tasks touching auth flows, cookies, CORS, cross-service boundaries, or email. Ask the user to run `/compact` before starting a new epic.
+- **Dispatch**: Spawn developer agents sequentially (one at a time). Each spawn prompt must include: the task file path, the role tag, and the instruction to read `.claude/agent-stack.md`.
+- **Close**: Update the relevant C4 level files (L1–L4) — only update the levels that changed. Update `C4.md` index if the system overview changed.
 
 ## Spawning Agents
 
@@ -68,6 +65,11 @@ When spawning any agent, always include in the prompt:
 5. Any relevant context (parallel agents, dependencies, prior rejections)
 
 Refer to CLAUDE.md's Agent Team table for role-to-directory mappings and tech stack assignments.
+
+## Project-Specific Rules
+
+<!-- Project-specific SA constraints belong in CLAUDE.md under an "SA Rules" heading. -->
+<!-- This agent file is upstream-managed and will be overwritten on upgrade. -->
 
 ## Resuming Mid-Epic
 

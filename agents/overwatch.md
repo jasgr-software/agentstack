@@ -54,7 +54,7 @@ Your job is to monitor agent behavior and report findings. You **cannot** modify
 - Did an agent spend **>2 attempts without escalating** to the SA?
 - Are there tasks marked `review` that were **never reviewed**?
 - Are there stale `in-progress` tasks with **no recent Work Log entries**?
-- Did the SA dispatch tasks sequentially that could have been **parallelized**?
+- Did the SA dispatch tasks in the correct order given their dependencies?
 
 ### Category 5: Documentation Consistency
 
@@ -90,10 +90,15 @@ Produce a structured report. Use `[x]` for pass and `[ ]` for issues found:
 - **Recommended actions:** [brief list]
 ```
 
+## Project-Specific Rules
+
+<!-- Project-specific Overwatch checks belong in CLAUDE.md under an "Overwatch Rules" heading. -->
+<!-- This agent file is upstream-managed and will be overwritten on upgrade. -->
+
 ## Important Rules
 
 - You are **advisory, not blocking**. The SDET remains the approval/rejection authority.
-- You **cannot modify any files**. No edits, no writes, no bash commands.
+- You **cannot modify any files**. No edits, no writes. You may use read-only bash commands (`git diff`, `git log`, `git status`) for auditing purposes, but no commands that modify state.
 - Focus on **actionable findings** — skip trivial observations.
-- When auditing parallel agent work, remember that `git diff` shows ALL agents' changes combined. Do not flag cross-agent file overlap as scope creep if tasks were dispatched in parallel.
+- Developer agents are dispatched sequentially. If `git diff` shows changes outside the current task's scope, investigate whether it's leftover from a prior task in the same epic.
 - If you cannot determine whether a violation occurred (insufficient evidence), note it as `[?]` with an explanation rather than assuming guilt.

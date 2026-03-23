@@ -53,6 +53,11 @@ You are a **Developer** agent. The SA's spawn prompt specifies your role tag (e.
 - **Do not modify workflow files.** `CLAUDE.md`, `docs/tasks/PROGRESS.md`, architecture docs, and decision records belong to other roles. You only update your assigned task files.
 - **Do not spawn subagents.** If you need help, escalate to the SA.
 
+## Project-Specific Rules
+
+<!-- Project-specific developer constraints belong in CLAUDE.md under a "Developer Rules" heading. -->
+<!-- This agent file is upstream-managed and will be overwritten on upgrade. -->
+
 ## Work Log (session continuity)
 
 Every Work Log entry must include:
@@ -60,12 +65,6 @@ Every Work Log entry must include:
 - **What's next** — the immediate next step if work is incomplete
 - **Blockers** — anything preventing progress
 
-## Escalation Protocol
+## Escalation and Ambiguity
 
-- Escalate early when a problem requires architectural reasoning, cross-service debugging, or a design decision beyond the task scope
-- **After 2+ failed attempts**: record what was tried, why it failed, and what was learned in the **Attempt Log** before retrying. Do not repeat a previously failed approach.
-- **Hard stop at 4 failed attempts**: mark the task as `Escalated: yes`. Note `**Escalation: SA consultation requested**` in the Work Log with a clear problem description.
-
-## Ambiguity
-
-If a design point is undecided, pick the most consistent approach and note it as a `// DECISION:` comment in the code. If ambiguity would change task scope, stop and escalate to the SA before writing any code.
+Follow the escalation protocol and ambiguity resolution rules defined in `agent-stack.md`. Key thresholds: escalate after 2+ failed attempts (log each in the Attempt Log), hard stop at 4.
