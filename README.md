@@ -151,6 +151,8 @@ The output tells you what happened to each file:
 
 **If you've customized an upstream file** in a specific project (e.g., tweaked `agent-stack.md`), use `--diff` first to see what you'd lose, then decide whether to accept the update or keep your version.
 
+**Project-specific agent rules** belong in `CLAUDE.md`, not in the agent files. Since `agents/*.md` are upstream-managed and overwritten on upgrade, any project-specific constraints (e.g., "use `pnpm --filter` for all commands", "never use `cd` in shell commands") should go in `CLAUDE.md` under role-specific headings like "Developer Rules" or "SDET Rules". Each agent reads `CLAUDE.md` on startup, so rules there are authoritative. The agent files contain a `## Project-Specific Rules` placeholder pointing to this convention.
+
 ## Getting started
 
 ### Greenfield vs. brownfield
@@ -269,7 +271,7 @@ Plan → Dispatch → Audit → Review → Validate → Close
 | Phase | What happens |
 |-------|-------------|
 | **Plan** | SA reads the epic requirements, architecture docs, and tenets. Creates a feature branch. Breaks the epic into task files in `docs/tasks/`. |
-| **Dispatch** | SA spawns developer agents for backlog tasks — in parallel where possible. Developers write tests first, implement until green, then run the submission gate before marking tasks as `review`. |
+| **Dispatch** | SA spawns developer agents for backlog tasks sequentially (one at a time). Developers write tests first, implement until green, then run the submission gate before marking tasks as `review`. |
 | **Audit** | SA spawns Overwatch to scan all `review` tasks for rule violations, scope creep, and inefficiencies. Findings are addressed before moving to Review. |
 | **Review** | SA spawns the SDET for each `review` task. The SDET must run lint, type-check, and tests before approving. Rejections go back to `backlog` with notes. |
 | **Validate** | Two completion gates: the RA validates the epic satisfies requirements end-to-end (runs the full e2e suite), and the SDET runs the full CI pipeline. Both must pass. |
@@ -348,6 +350,120 @@ your-project/
         ├── TASK-001-001-some-task.md   # (created by SA during Plan)
         └── done/                      # Completed tasks move here
 ```
+
+## Permission configuration (semi-yolo mode)
+
+The agent stack spawns multiple subagents that run shell commands, read/write files, and execute tests. By default, Claude Code prompts for permission on each action, which interrupts autonomous execution constantly — especially during the SA's Dispatch and Review phases.
+
+**Semi-yolo mode** is a curated permission configuration that pre-allows safe, routine operations while explicitly denying destructive ones. This lets agents work autonomously without your constant approval, while still protecting against dangerous commands.
+
+### How to configure
+
+Create or edit `.claude/settings.json` in your project:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Agent",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskGet",
+      "TaskList",
+      "TaskOutput",
+      "TaskStop",
+      "Skill",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "WebSearch",
+      "WebFetch",
+      "Write(docs/**)",
+      "Write(agents/**)",
+      "Write(CLAUDE.md)",
+      "Edit(docs/**)",
+      "Edit(agents/**)",
+      "Edit(CLAUDE.md)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(echo:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(grep:*)",
+      "Bash(diff:*)",
+      "Bash(which:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -fd*)",
+      "Bash(rm -rf /home*)",
+      "Bash(rm -rf /*)"
+    ]
+  }
+}
+```
+
+### What to customize
+
+The example above covers workflow operations (docs, agents, task tracking) and common shell tools. You'll want to add entries for your project's tech stack:
+
+**Source code write access** — add `Write` and `Edit` patterns for your application directories:
+```json
+"Write(src/**)",
+"Write(apps/**)",
+"Edit(src/**)",
+"Edit(apps/**)"
+```
+
+**Build tools** — add your project's package manager, compiler, and test runner:
+```json
+"Bash(npm:*)",
+"Bash(pnpm:*)",
+"Bash(dotnet:*)",
+"Bash(cargo:*)",
+"Bash(go:*)",
+"Bash(python3:*)",
+"Bash(docker:*)",
+"Bash(npx:*)",
+"Bash(node:*)"
+```
+
+### The deny list
+
+The deny list is just as important as the allow list. The defaults above prevent force-pushes, hard resets, and recursive deletes. Consider adding project-specific denials:
+
+```json
+"deny": [
+  "Bash(git push --force*)",
+  "Bash(git push -f*)",
+  "Bash(git reset --hard*)",
+  "Bash(git clean -fd*)",
+  "Bash(rm -rf /home*)",
+  "Bash(rm -rf /*)",
+  "Bash(sudo:*)"
+]
+```
+
+### Project vs local settings
+
+- `.claude/settings.json` — checked into the repo, shared with the team. Put permissions here that every developer should have.
+- `.claude/settings.local.json` — gitignored, per-developer overrides. Put environment-specific tokens (`GH_TOKEN`), absolute paths, and personal tool preferences here.
+
+Anything in `settings.local.json` merges on top of `settings.json`. If a permission appears in both allow lists, it's allowed. Deny takes precedence over allow.
+
+### Why not full yolo?
+
+Full `acceptEdits` or `dangerouslyDisableSandbox` modes remove all guardrails. Semi-yolo is a middle ground: agents run without interruption for routine work, but you still get prompted for anything unusual — new file locations, unfamiliar commands, or operations not in your allowlist. The deny list acts as a safety net even if an agent tries something destructive.
 
 ## Origin
 

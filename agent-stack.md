@@ -6,7 +6,7 @@ All agents must read this file before starting work.
 
 ## Agent Roles
 
-Eight specialised roles collaborate on the project. Each role has strict boundaries.
+Five specialised role types collaborate on the project. Each has strict boundaries. Projects define how many Developer instances they need (e.g., backend, frontend, mobile, infrastructure) in `CLAUDE.md`.
 
 | Role | Agent File | Responsibility |
 |------|-----------|----------------|
@@ -24,7 +24,7 @@ The main Claude Code session (not an agent) follows these rules:
 - **Never modify requirements directly.** The RA owns all requirements documents.
 - **Git operations are the main session's responsibility, except branch creation.** Agents write code but do not commit, push, or manage branches. The SA creates branches during its Plan phase. The main session executes commits, pushes, and PRs when the SA requests approval.
 - **Always ask before committing or pushing.** Propose a commit message and wait for explicit approval.
-- **Parallel agents share a working directory.** When multiple developer agents run in parallel, `git diff` shows ALL agents' changes combined. Note this when dispatching the SDET for review to avoid false-positive scope creep rejections.
+- **No worktree-based parallelization.** Do not use git worktrees for parallel agent execution. The merge complexity, conflict resolution overhead, and two-pass SDET review outweigh the time savings. Dispatch developer agents sequentially. When the user wants parallelism, they will open separate Claude Code sessions on separate branches manually.
 
 ## Task Pipeline
 
@@ -70,7 +70,7 @@ Before marking any task as `review`, the developer agent **must** pass:
 
 A task **must not** be marked `review` if any of these fail. A task with `E2e-required: yes` **must not** be marked `review` if Docker is unavailable — the e2e result is invalid without a running stack.
 
-**E2E execution proof requirement:** For any task with `E2e-required: yes`, the developer **must** include actual test execution output (pass/fail counts, test names) in the Work Log. "Tests written but not executed" or "Docker not available" is **not acceptable** — the developer must escalate to the SA, who will ask the user to start Docker. No e2e task may be submitted for review without execution proof.
+**E2E execution proof requirement:** For any task with `E2e-required: yes`, the developer **must** include actual test execution output (pass/fail counts, test names) in the Work Log. "Tests written but not executed", "Docker not available", or curl-based API verification are **not acceptable substitutes** for e2e tests. If e2e tests are blocked (networking, browser, infrastructure issue), the developer must **stop and escalate to the SA** — do not work around the blocker. The SA escalates to the user or dispatches the devops agent to fix the underlying issue before any e2e-required task can proceed.
 
 **Domain-specific gates:** Projects may define additional submission gates in `CLAUDE.md` for integration-heavy domains (e.g., "must run a real data import before review", "must update operational docs when changing infrastructure"). These are enforced alongside the standard gates above.
 
@@ -94,9 +94,9 @@ Both the **RA** and **SA** are invoked directly by the user (not as subagents). 
 | Phase | What the SA does |
 |-------|-----------------|
 | **Plan** | **Context pre-flight: if starting a new epic, ask the user to run `/compact` to maximize context for the orchestration cycle.** Read epic requirements + architecture docs + tenets. **Docker pre-flight: run `docker info` — if Docker is unavailable, STOP and ask the user to start Docker before proceeding.** Create feature branch. Break epic into tasks in `docs/tasks/`. Update PROGRESS.md. |
-| **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks (in parallel where possible). Wait for completion. **If worktrees were used:** dispatch SDET for Pass 1 (worktree review) per-worktree before merging. Merge approved worktrees, resolve conflicts. Update PROGRESS.md. |
+| **Dispatch** | **Before each wave containing `E2e-required: yes` tasks, verify Docker is healthy (`docker compose ps`). If Docker is down, STOP and ask the user to restart it — do not dispatch without a running stack.** Spawn developer agents for `backlog` tasks sequentially (one at a time). Wait for completion. Update PROGRESS.md. |
 | **Audit** | Spawn Overwatch to audit all `review` tasks for rule compliance, scope creep, and inefficiencies. Address findings before Review. Update PROGRESS.md. |
-| **Review** | Spawn SDET for each task with status `review`. **If worktrees were used:** this is Pass 2 (integration review) — SDET reviews the merged result, runs full test suite, and validates conflict resolutions. Handle rejections (task → `backlog` with notes). Update PROGRESS.md. |
+| **Review** | Spawn SDET for each task with status `review`. Handle rejections (task → `backlog` with notes). Update PROGRESS.md. |
 | **Validate** | Spawn RA for epic completion gate (e2e suite). Spawn SDET for CI gate. Update PROGRESS.md. |
 | **Close** | Update architecture model, create ADRs, archive epic file, request user approval to commit/push/PR. |
 
@@ -114,7 +114,7 @@ When invoked, the SA reads PROGRESS.md to determine the current phase and acts a
 
 **Epic completion gates** (during Validate phase):
 - **Docker pre-flight**: Before running either gate, verify Docker is available (`docker info`) and the stack is healthy (`docker compose ps`). If Docker is unavailable, **STOP** — do not run gates.
-- **RA gate**: Validates the completed epic satisfies requirements end-to-end — rejects if any user workflow is incomplete. Runs the full e2e suite. Updates requirements to mark as `Implemented`.
+- **RA gate**: Maps each acceptance criterion to completed tasks and each requirement to e2e tests (rejects if any gaps exist). Validates the completed epic satisfies requirements end-to-end — rejects if any user workflow is incomplete. Runs the full e2e suite. Updates requirements to mark as `Implemented`.
 - **CI gate**: SDET runs the full CI pipeline (lint → type-check → build → all test suites). The epic is not complete until both gates pass.
 
 ## Git Operations
@@ -127,32 +127,6 @@ When invoked, the SA reads PROGRESS.md to determine the current phase and acts a
 4. Delete the branch after merge
 
 One branch per epic or logical unit of work. No long-lived branches spanning multiple epics. If an epic is too large for a single branch, the RA should split it into smaller epics before the SA begins the Plan phase.
-
-### Worktree Development
-
-When developer agents use worktrees for parallel development, SDET review happens in **two passes**:
-
-#### Pass 1 — Worktree Review (pre-merge)
-
-Before merging any worktree into the epic branch, the SA dispatches the SDET to review each worktree in isolation:
-
-1. The SA provides the worktree path so the SDET can inspect it directly (e.g., `git -C .claude/worktrees/<agent-id> diff`).
-2. The SDET reviews for code quality, security, conventions, and tenet compliance.
-3. The SDET runs **targeted tests only** (unit/component tests for the changed code). No e2e tests — worktrees are isolated and don't have the full stack.
-4. The SA must not merge worktree changes until the SDET approves. If changes are already merged, the SDET notes this as "post-merge audit" rather than a gate approval.
-
-#### Pass 2 — Integration Review (post-merge)
-
-After all approved worktrees are merged and conflicts are resolved, the SA dispatches the SDET for a single integration review of the merged result:
-
-1. The SDET runs lint, type-check, and the full test suite on the integrated code.
-2. The SDET verifies conflict resolutions are correct (especially shared files like i18n, config, schema).
-3. If any task has `E2e-required: yes`, the SDET runs targeted e2e tests at this stage (with Docker pre-flight).
-4. This is the true quality gate — worktree review alone is not sufficient for merge to proceed to Validate.
-
-#### Conflict resolution
-
-If merging an approved worktree creates conflicts with another worktree's changes, the main session resolves conflicts and the integration review covers the resolution. No need to re-review the full task — just the conflict areas.
 
 ## Ambiguity During Implementation
 
