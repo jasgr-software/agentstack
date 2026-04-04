@@ -106,7 +106,7 @@ $dirs = @(
     "docs/architecture",
     "docs/decisions",
     "docs/requirements",
-    "docs/requirements/archive"
+    "docs/requirements/implemented"
 )
 foreach ($dir in $dirs) {
     New-Item -ItemType Directory -Path (Join-Path $Target $dir) -Force | Out-Null

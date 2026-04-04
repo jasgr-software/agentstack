@@ -128,7 +128,7 @@ mkdir -p "$TARGET/docs/tasks/done"
 mkdir -p "$TARGET/docs/architecture"
 mkdir -p "$TARGET/docs/decisions"
 mkdir -p "$TARGET/docs/requirements"
-mkdir -p "$TARGET/docs/requirements/archive"
+mkdir -p "$TARGET/docs/requirements/implemented"
 
 # Copy upstream-managed files (always updated)
 for mapping in "${UPSTREAM_FILES[@]}"; do

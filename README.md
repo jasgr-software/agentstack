@@ -106,7 +106,7 @@ cp templates/C4-L4-code.md "$TARGET/docs/architecture/C4-L4-code.md"
 cp templates/TENETS.md "$TARGET/docs/architecture/TENETS.md"
 
 # Requirements
-mkdir -p "$TARGET/docs/requirements/archive"
+mkdir -p "$TARGET/docs/requirements/implemented"
 cp templates/SRS.md "$TARGET/docs/requirements/SRS.md"
 
 # ADR template
@@ -258,24 +258,25 @@ Requirements phase:  You → RA  (define what to build)
 Execution phase:     You → SA  (build it)
 ```
 
-Both the RA and SA are invoked directly by you — not as subagents of each other. This gives them full ability to spawn the other roles as subagents.
+The SA is always invoked directly by you. The RA has two modes: invoked directly by you for requirements definition, or spawned as a subagent of the SA during the Validate phase to run the e2e completion gate.
 
 ### The SA phase lifecycle
 
-Once you invoke the SA with a defined epic, it drives autonomously through six phases:
+Once you invoke the SA with a defined epic, it drives autonomously through seven phases:
 
 ```
-Plan → Dispatch → Audit → Review → Validate → Close
+Plan → Dispatch → Audit → Review → Smoke → Validate → Close
 ```
 
 | Phase | What happens |
 |-------|-------------|
-| **Plan** | SA reads the epic requirements, architecture docs, and tenets. Creates a feature branch. Breaks the epic into task files in `docs/tasks/`. |
-| **Dispatch** | SA spawns developer agents for backlog tasks sequentially (one at a time). Developers write tests first, implement until green, then run the submission gate before marking tasks as `review`. |
-| **Audit** | SA spawns Overwatch to scan all `review` tasks for rule violations, scope creep, and inefficiencies. Findings are addressed before moving to Review. |
-| **Review** | SA spawns the SDET for each `review` task. The SDET must run lint, type-check, and tests before approving. Rejections go back to `backlog` with notes. |
-| **Validate** | Two completion gates: the RA validates the epic satisfies requirements end-to-end (runs the full e2e suite), and the SDET runs the full CI pipeline. Both must pass. |
-| **Close** | SA updates the architecture model, creates ADRs for significant decisions, archives the epic, and requests your approval to commit, push, and create a PR. |
+| **Plan** | SA reads the epic requirements, architecture docs, and tenets. Creates a feature branch. Breaks the epic into task files in `docs/tasks/`. Runs a design coherence gate against the C4 model and tenets. Marks each task with `Impl: sa` (simple, self-implemented) or `Impl: developer` (delegated). |
+| **Dispatch** | SA spawns developer agents for backlog tasks sequentially (one at a time). Simple tasks marked `Impl: sa` are self-implemented by the SA directly. Developers write tests first, implement until green, then run the submission gate before marking tasks as `review`. |
+| **Audit** | SA spawns Overwatch to scan all `review` tasks for rule violations, scope creep, and inefficiencies. Findings are addressed before moving to Review. (The SA may also run mid-dispatch audits for larger epics when risk signals appear.) |
+| **Review** | SA spawns the SDET for each `review` task. The SDET must run lint, type-check, and tests before approving. Rejections go back to `backlog` with notes. After all tasks pass, the SA runs an architecture scan against the C4 model. |
+| **Smoke** | SDET runs a container smoke test against Docker — validates image builds, container startup, migrations, inter-service networking, health endpoints, and basic UI. No local dev processes — Docker containers only. |
+| **Validate** | Two completion gates: the RA validates the epic satisfies requirements end-to-end (runs the full e2e suite), and the SDET runs the full CI pipeline plus a quality parity audit. Both must pass. |
+| **Close** | SA updates the architecture model, creates ADRs, archives task/bug/epic files to `done/` and `implemented/`, spawns Overwatch for a retrospective, and requests your approval to commit, push, and create a PR. |
 
 If a session ends mid-epic, you just re-invoke the SA. It reads `PROGRESS.md` to determine where it left off and resumes from there.
 
@@ -287,7 +288,8 @@ The stack enforces quality through several mechanisms:
 - **Submission gates**: Before any task can be marked for review, the developer must pass lint, type-check, and relevant tests. The specific commands are defined in your project's `CLAUDE.md`.
 - **SDET review**: An independent reviewer runs the same checks and inspects for security flaws, edge cases, and documentation gaps. Nothing ships without SDET sign-off.
 - **Overwatch audits**: A read-only agent scans for process violations — missing work logs, skipped gates, scope creep, repeated failed approaches.
-- **Epic completion gates**: The RA validates the full user workflow works end-to-end. The SDET validates the full CI pipeline passes. Both gates must clear before an epic is complete.
+- **Container smoke test**: After Review, the SDET validates that all services build and run correctly as Docker containers before the epic proceeds to Validate.
+- **Epic completion gates**: The RA validates the full user workflow works end-to-end. The SDET validates the full CI pipeline passes and audits quality parity across all UI apps. Both gates must clear before an epic is complete.
 
 ### Session continuity
 
@@ -298,6 +300,19 @@ Claude Code sessions end. Context windows fill up. The agent stack handles this 
 - **Task files** track status (`backlog` → `in-progress` → `review` → `done`) and move to `docs/tasks/done/` when complete
 
 This means any agent — or the same agent in a new session — can pick up exactly where work left off by reading these files.
+
+### Live progress tracking
+
+All four agent roles (developer, SDET, SA, RA) use `TaskCreate` and `TaskUpdate` to show real-time progress in the Claude Code UI. When an agent is dispatched, it breaks its work into 3–6 visible steps with spinners:
+
+```
+✓ Read source code and existing tests
+✓ Write failure mode test script
+● Running lint and type-check
+○ Update work log
+```
+
+This gives you a live indicator of what the agent is doing instead of staring at a blank screen for 5–8 minutes. These are ephemeral UI tasks — separate from the persistent task files in `docs/tasks/` which serve as the cross-session audit trail.
 
 ### Escalation protocol
 
@@ -342,7 +357,7 @@ your-project/
     ├── requirements/
     │   ├── SRS.md                     # Software Requirements Specification
     │   ├── ep-001-first-epic.md       # (created by RA)
-    │   └── archive/                   # Completed epics move here
+    │   └── implemented/                # Completed epics move here
     └── tasks/
         ├── TASK-TEMPLATE.md           # Template for new tasks
         ├── BUG-TEMPLATE.md            # Template for bug reports

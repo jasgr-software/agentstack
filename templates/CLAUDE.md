@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides project-specific guidance to Claude Code. For the reusable multi-agent workflow engine, see `.claude/agent-stack.md`. For individual agent instructions, see `agents/*.md`.
 
 ## Product Vision
 
@@ -46,6 +46,20 @@ Before marking any task as `review`, the developer agent **must** pass:
      - API tasks must verify OpenAPI spec is consistent with implementation
      Domain-specific gates catch integration issues that unit tests and lint cannot. -->
 
+### Container Smoke Test
+
+<!-- The SDET runs this after Review phase. Must use Docker containers — local dev is not valid.
+     Define the commands or script here. If you have a smoke-test.sh, reference it.
+     Otherwise, define the manual steps: docker compose build, up, health checks, basic UI validation. -->
+
+```bash
+# TODO: Define your container smoke test
+# scripts/smoke-test.sh     # Or define manual steps:
+# docker compose down -v && docker compose build && docker compose up -d
+# docker compose ps          # All services healthy
+# curl -sf http://localhost:PORT/health   # Per-service health checks
+```
+
 ### Infrastructure Documentation Consistency
 
 <!-- If your project has infrastructure-as-code (Terraform, Bicep, CloudFormation, etc.),
@@ -55,6 +69,14 @@ Before marking any task as `review`, the developer agent **must** pass:
      **must update operational documentation** (inventory, runbooks, deployment guides) as part
      of the task. The SDET **must verify** that operational docs are consistent with infrastructure
      code changes — reject if stale. -->
+
+### Required CI Checks (branch protection)
+
+<!-- TODO: If your repo uses branch protection with required status checks, document them here.
+     This helps agents understand which CI jobs must pass before a PR can merge. -->
+
+<!-- Example: The `build` and `test` jobs in `.github/workflows/ci.yml` are **required status checks**
+     for PR merge. They must pass before any PR can be merged to `main`. -->
 
 ### Epic Completion Gates
 
@@ -125,7 +147,7 @@ Before marking any task as `review`, the developer agent **must** pass:
 
 <!-- TODO: List important docs that agents should reference -->
 
-- `.claude/agent-stack.md` — multi-agent workflow engine
+- `.claude/agent-stack.md` — multi-agent workflow engine (7 phases: Plan → Dispatch → Audit → Review → Smoke → Validate → Close)
 - `agents/*.md` — agent role definitions (RA, SA, Developer, SDET, Overwatch)
 - `docs/architecture/C4.md` — C4 architecture model index (SA updates level files after each epic)
 - `docs/architecture/C4-L1-context.md` — system context, actors, external systems
@@ -134,4 +156,7 @@ Before marking any task as `review`, the developer agent **must** pass:
 - `docs/architecture/C4-L4-code.md` — code conventions, patterns, project structure
 - `docs/architecture/TENETS.md` — architectural tenets
 - `docs/requirements/SRS.md` — Software Requirements Specification
-- `docs/decisions/` — architecture decision records
+- `docs/requirements/implemented/` — archived epic files for completed requirements
+- `docs/decisions/` — architecture decision records (SA creates per § ADR Lifecycle)
+- `docs/tasks/PROGRESS.md` — current epic state (archived to `docs/tasks/done/PROGRESS-ARCHIVE.md` at Close)
+- `docs/tasks/done/RETRO-EEE.md` — Overwatch retrospective reports per epic

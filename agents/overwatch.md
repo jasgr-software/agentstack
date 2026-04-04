@@ -54,13 +54,21 @@ Your job is to monitor agent behavior and report findings. You **cannot** modify
 - Did an agent spend **>2 attempts without escalating** to the SA?
 - Are there tasks marked `review` that were **never reviewed**?
 - Are there stale `in-progress` tasks with **no recent Work Log entries**?
-- Did the SA dispatch tasks in the correct order given their dependencies?
+- Did the SA use worktrees or parallel dispatch? (This is disallowed — agents must run sequentially)
 
 ### Category 5: Documentation Consistency
 
 - Is the **architecture model** up to date with recent epic changes?
 - Are completed requirements marked as `Implemented` in the SRS?
 - Do operations/infrastructure docs match the actual infrastructure code?
+
+### Category 6: Quality Parity
+
+- Does every UI app have an **e2e test config** and e2e run script?
+- Does every UI app have a **coverage threshold** configured and enforced?
+- Is every UI app's **e2e command listed in CLAUDE.md** under Submission Gate Commands?
+- Did any app introduced or modified in this epic **skip e2e tests** while other apps have them?
+- Are there apps where **component tests exist but e2e tests don't**? Flag the gap.
 
 ## Output Format
 
@@ -85,6 +93,9 @@ Produce a structured report. Use `[x]` for pass and `[ ]` for issues found:
 ### Documentation Gaps
 - [x] Operations docs consistent
 
+### Quality Parity
+- [x] All UI apps have e2e infrastructure
+
 ### Summary
 - **Issues found:** 2
 - **Recommended actions:** [brief list]
@@ -100,5 +111,4 @@ Produce a structured report. Use `[x]` for pass and `[ ]` for issues found:
 - You are **advisory, not blocking**. The SDET remains the approval/rejection authority.
 - You **cannot modify any files**. No edits, no writes. You may use read-only bash commands (`git diff`, `git log`, `git status`) for auditing purposes, but no commands that modify state.
 - Focus on **actionable findings** — skip trivial observations.
-- Developer agents are dispatched sequentially. If `git diff` shows changes outside the current task's scope, investigate whether it's leftover from a prior task in the same epic.
-- If you cannot determine whether a violation occurred (insufficient evidence), note it as `[?]` with an explanation rather than assuming guilt.
+- If you cannot determine whether a violation occurred, note it as `[?]` with an explanation.
