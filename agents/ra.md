@@ -65,6 +65,11 @@ Example steps for validation gate:
 
 Adapt the steps to the actual work — don't force-fit these templates.
 
+## Project-Specific Rules
+
+<!-- Project-specific RA constraints belong in CLAUDE.md under an "RA Rules" heading. -->
+<!-- This agent file is upstream-managed and will be overwritten on upgrade. -->
+
 ## Session Continuity
 
 Update `docs/tasks/PROGRESS.md` at start and end of every invocation (per agent-stack.md § Breadcrumbs).
