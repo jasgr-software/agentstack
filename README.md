@@ -37,7 +37,8 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 
 | File | Purpose |
 |------|---------|
-| `agent-stack.md` | The workflow engine — roles, task pipeline, SA phases, escalation protocol, git rules. Copied to `.claude/agent-stack.md` in your project. |
+| `agent-stack.md` | The workflow engine — roles, gated paths, task pipeline, submission gates, escalation protocol, git rules. Copied to `.claude/agent-stack.md` in your project. |
+| `agent-phases.md` | SA-only reference — phase lifecycle, epic scorecard, post-close protocol, testing epics, self-implementation criteria. Copied to `.claude/agent-phases.md`. Reduces context load for non-SA agents. |
 | `agents/ra.md` | Requirements Analyst agent — owns the SRS, defines epics, validates completed work |
 | `agents/sa.md` | System Architect agent — autonomous orchestrator, drives epic execution |
 | `agents/developer.md` | Developer agent template — generic, spawned by SA with a specific role tag and task |
@@ -46,7 +47,10 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 | `templates/CLAUDE.md` | Skeleton project CLAUDE.md with TODO placeholders for your stack |
 | `templates/TASK-TEMPLATE.md` | Task file template used by the SA when breaking down epics |
 | `templates/BUG-TEMPLATE.md` | Bug report template used by the SDET when rejecting tasks |
-| `templates/PROGRESS.md` | Shared progress tracker for SA, RA, and SDET |
+| `templates/PROGRESS.md` | Shared progress tracker — fixed 5-section structure with quality gates checklist |
+| `templates/commands/status.md` | Quick status command — reads PROGRESS.md, lists tasks, shows git state |
+| `templates/commands/ra.md` | RA spawn shortcut — invokes the Requirements Analyst with standard context |
+| `templates/commands/sa.md` | SA spawn shortcut — invokes the System Architect with standard context |
 | `templates/C4.md` | C4 architecture model index — links to the four level files |
 | `templates/C4-L1-context.md` | System context — actors, external systems |
 | `templates/C4-L2-containers.md` | Containers — deployable units, technologies, relationships |
@@ -82,6 +86,13 @@ TARGET=/path/to/your/project
 # Core workflow engine
 mkdir -p "$TARGET/.claude"
 cp agent-stack.md "$TARGET/.claude/agent-stack.md"
+cp agent-phases.md "$TARGET/.claude/agent-phases.md"
+
+# Command templates
+mkdir -p "$TARGET/.claude/commands"
+cp templates/commands/status.md "$TARGET/.claude/commands/status.md"
+cp templates/commands/ra.md "$TARGET/.claude/commands/ra.md"
+cp templates/commands/sa.md "$TARGET/.claude/commands/sa.md"
 
 # Agent files
 mkdir -p "$TARGET/agents"
@@ -140,8 +151,8 @@ The scripts distinguish between two categories of files:
 
 | Category | Files | On upgrade |
 |----------|-------|-----------|
-| **Upstream-managed** | `.claude/agent-stack.md`, `agents/*.md` (all agent files), `docs/tasks/TASK-TEMPLATE.md`, `docs/tasks/BUG-TEMPLATE.md` | Always updated to latest |
-| **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4.md`, `docs/architecture/C4-L1-context.md`, `docs/architecture/C4-L2-containers.md`, `docs/architecture/C4-L3-components.md`, `docs/architecture/C4-L4-code.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md` | Never overwritten (your project config) |
+| **Upstream-managed** | `.claude/agent-stack.md`, `.claude/agent-phases.md`, `agents/*.md` (all agent files), `docs/tasks/TASK-TEMPLATE.md`, `docs/tasks/BUG-TEMPLATE.md` | Always updated to latest |
+| **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4*.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md`, `.claude/commands/*.md` | Never overwritten (your project config) |
 
 The output tells you what happened to each file:
 - `+` new file created
@@ -262,21 +273,22 @@ The SA is always invoked directly by you. The RA has two modes: invoked directly
 
 ### The SA phase lifecycle
 
-Once you invoke the SA with a defined epic, it drives autonomously through seven phases:
+Once you invoke the SA with a defined epic, it drives autonomously through eight phases:
 
 ```
-Plan → Dispatch → Audit → Review → Smoke → Validate → Close
+Plan → Dispatch → Audit → Review → Smoke → Validate → Close-prep → Close-finalize
 ```
 
 | Phase | What happens |
 |-------|-------------|
-| **Plan** | SA reads the epic requirements, architecture docs, and tenets. Creates a feature branch. Breaks the epic into task files in `docs/tasks/`. Runs a design coherence gate against the C4 model and tenets. Marks each task with `Impl: sa` (simple, self-implemented) or `Impl: developer` (delegated). |
+| **Plan** | SA triages the backlog, reads epic requirements + architecture docs + tenets. Creates a feature branch. Breaks the epic into task files in `docs/tasks/`. Runs a design coherence gate against the C4 model and tenets. Marks each task with `Impl: sa` (simple, self-implemented) or `Impl: developer` (delegated). |
 | **Dispatch** | SA spawns developer agents for backlog tasks sequentially (one at a time). Simple tasks marked `Impl: sa` are self-implemented by the SA directly. Developers write tests first, implement until green, then run the submission gate before marking tasks as `review`. |
 | **Audit** | SA spawns Overwatch to scan all `review` tasks for rule violations, scope creep, and inefficiencies. Findings are addressed before moving to Review. (The SA may also run mid-dispatch audits for larger epics when risk signals appear.) |
 | **Review** | SA spawns the SDET for each `review` task. The SDET must run lint, type-check, and tests before approving. Rejections go back to `backlog` with notes. After all tasks pass, the SA runs an architecture scan against the C4 model. |
 | **Smoke** | SDET runs a container smoke test against Docker — validates image builds, container startup, migrations, inter-service networking, health endpoints, and basic UI. No local dev processes — Docker containers only. |
 | **Validate** | Two completion gates: the RA validates the epic satisfies requirements end-to-end (runs the full e2e suite), and the SDET runs the full CI pipeline plus a quality parity audit. Both must pass. |
-| **Close** | SA updates the architecture model, creates ADRs, archives task/bug/epic files to `done/` and `implemented/`, spawns Overwatch for a retrospective, and requests your approval to commit, push, and create a PR. |
+| **Close-prep** | SA updates the architecture model, creates ADRs, archives task/bug/epic files, spawns Overwatch for a retrospective, and requests your approval to commit, push, and create a PR. The epic enters "PR limbo" until merged. |
+| **Close-finalize** | After PR merge. SA verifies post-merge CI and staging smoke (if applicable). If issues are found, they're tracked as post-merge bugs. On success, the epic is fully archived and removed from PROGRESS.md. |
 
 If a session ends mid-epic, you just re-invoke the SA. It reads `PROGRESS.md` to determine where it left off and resumes from there.
 
@@ -337,7 +349,12 @@ After setup, your project will have this structure:
 your-project/
 ├── CLAUDE.md                          # Your project config (product, team, commands)
 ├── .claude/
-│   └── agent-stack.md                 # Workflow engine (upstream-managed)
+│   ├── agent-stack.md                 # Workflow engine (upstream-managed)
+│   ├── agent-phases.md                # SA-only phase reference (upstream-managed)
+│   └── commands/
+│       ├── status.md                  # /status — quick progress check
+│       ├── ra.md                      # /ra — invoke Requirements Analyst
+│       └── sa.md                      # /sa — invoke System Architect
 ├── agents/
 │   ├── ra.md                          # Requirements Analyst (upstream-managed)
 │   ├── sa.md                          # System Architect (upstream-managed)

@@ -1,32 +1,40 @@
-# PROGRESS.md — Epic Progress Tracker
+# Epic Progress
 
-This file is the shared external memory for the SA, RA, and SDET. These agents must update this file at the start and end of every invocation. Developer agents use their task file's Work Log instead.
-
-## Current Epic
-
-**Epic:** <!-- ep-NNN-name -->
-**Branch:** <!-- ep-NNN-short-description -->
-**Phase:** <!-- Plan / Dispatch / Audit / Review / Validate / Close -->
 **Last updated:** <!-- YYYY-MM-DD -->
 
-## Agent Status
+## Current initiative
 
-| Agent | Last Action | Next Step | Blockers |
-|-------|------------|-----------|----------|
-| SA | — | — | — |
-| RA | — | — | — |
-| SDET | — | — | — |
+- **Name:** <!-- ep-NNN-name or chore description -->
+- **Branch:** <!-- ep-NNN-short-description -->
+- **Goal:** <!-- one-sentence: what this branch delivers -->
+- **Phase:** <!-- Plan / Dispatch / Audit / Review / Smoke / Validate / Close-prep / Close-finalize -->
+- **Gated:** <!-- yes / no -->
 
-## Task Summary
+**Quality gates:**
 
-| Task | Status | Assigned To |
-|------|--------|-------------|
-| <!-- TASK-NNN --> | <!-- backlog/in-progress/review/done --> | <!-- role-tag --> |
+- [ ] Per-task submission gates (0/N tasks)
+- [ ] SDET Review (0/N approved)
+- [ ] Overwatch Audit
+- [ ] SA Architecture scan
+- [ ] Container Smoke gate
+- [ ] RA Validation gate
+- [ ] SDET CI gate
+- [ ] SDET Quality Parity audit
+- [ ] Post-merge CI
+- [ ] Post-merge staging smoke
 
-## Log
+## Awaiting PR merge
 
-<!-- Append entries here, newest first -->
+- None.
 
-### [role-tag] — YYYY-MM-DD
+## Active bugs
 
-<!-- What was done, decisions made, what's next -->
+- None.
+
+## Open retro action items
+
+- None.
+
+---
+
+<!-- Session entries below this line. Rolled to PROGRESS-ARCHIVE.md at each phase transition. -->
