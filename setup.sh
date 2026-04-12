@@ -14,6 +14,7 @@ usage() {
   echo ""
   echo "Upstream-managed files (always updated):"
   echo "  agent-stack.md        → <target>/.claude/agent-stack.md"
+  echo "  agent-phases.md       → <target>/.claude/agent-phases.md"
   echo "  agents/overwatch.md   → <target>/agents/overwatch.md"
   echo "  agents/ra.md          → <target>/agents/ra.md"
   echo "  agents/sa.md          → <target>/agents/sa.md"
@@ -33,6 +34,9 @@ usage() {
   echo "  templates/TENETS.md   → <target>/docs/architecture/TENETS.md"
   echo "  templates/SRS.md      → <target>/docs/requirements/SRS.md"
   echo "  templates/ADR-TEMPLATE.md → <target>/docs/decisions/ADR-TEMPLATE.md"
+  echo "  templates/commands/status.md → <target>/.claude/commands/status.md"
+  echo "  templates/commands/ra.md     → <target>/.claude/commands/ra.md"
+  echo "  templates/commands/sa.md     → <target>/.claude/commands/sa.md"
   exit 1
 }
 
@@ -62,6 +66,7 @@ TARGET="$(cd "$TARGET" && pwd)"
 # Files that are always updated (upstream-managed)
 UPSTREAM_FILES=(
   "agent-stack.md:.claude/agent-stack.md"
+  "agent-phases.md:.claude/agent-phases.md"
   "agents/overwatch.md:agents/overwatch.md"
   "agents/ra.md:agents/ra.md"
   "agents/sa.md:agents/sa.md"
@@ -83,6 +88,9 @@ PROJECT_FILES=(
   "templates/TENETS.md:docs/architecture/TENETS.md"
   "templates/SRS.md:docs/requirements/SRS.md"
   "templates/ADR-TEMPLATE.md:docs/decisions/ADR-TEMPLATE.md"
+  "templates/commands/status.md:.claude/commands/status.md"
+  "templates/commands/ra.md:.claude/commands/ra.md"
+  "templates/commands/sa.md:.claude/commands/sa.md"
 )
 
 if $DIFF_ONLY; then
@@ -122,6 +130,7 @@ echo ""
 
 # Create directories
 mkdir -p "$TARGET/.claude"
+mkdir -p "$TARGET/.claude/commands"
 mkdir -p "$TARGET/agents"
 mkdir -p "$TARGET/docs/tasks"
 mkdir -p "$TARGET/docs/tasks/done"

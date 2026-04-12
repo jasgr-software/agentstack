@@ -22,6 +22,7 @@ $Target = (Resolve-Path $Target).Path
 # Files that are always updated (upstream-managed)
 $UpstreamFiles = @(
     @{ Src = "agent-stack.md";                   Dest = ".claude/agent-stack.md" },
+    @{ Src = "agent-phases.md";                  Dest = ".claude/agent-phases.md" },
     @{ Src = "agents/overwatch.md";              Dest = "agents/overwatch.md" },
     @{ Src = "agents/ra.md";                     Dest = "agents/ra.md" },
     @{ Src = "agents/sa.md";                     Dest = "agents/sa.md" },
@@ -42,7 +43,10 @@ $ProjectFiles = @(
     @{ Src = "templates/C4-L4-code.md";          Dest = "docs/architecture/C4-L4-code.md" },
     @{ Src = "templates/TENETS.md";              Dest = "docs/architecture/TENETS.md" },
     @{ Src = "templates/SRS.md";                 Dest = "docs/requirements/SRS.md" },
-    @{ Src = "templates/ADR-TEMPLATE.md";        Dest = "docs/decisions/ADR-TEMPLATE.md" }
+    @{ Src = "templates/ADR-TEMPLATE.md";        Dest = "docs/decisions/ADR-TEMPLATE.md" },
+    @{ Src = "templates/commands/status.md";     Dest = ".claude/commands/status.md" },
+    @{ Src = "templates/commands/ra.md";         Dest = ".claude/commands/ra.md" },
+    @{ Src = "templates/commands/sa.md";         Dest = ".claude/commands/sa.md" }
 )
 
 function FilesAreEqual($path1, $path2) {
@@ -100,6 +104,7 @@ Write-Host ""
 # Create directories
 $dirs = @(
     ".claude",
+    ".claude/commands",
     "agents",
     "docs/tasks",
     "docs/tasks/done",
