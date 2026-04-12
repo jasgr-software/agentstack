@@ -59,6 +59,7 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 | `templates/TENETS.md` | Architectural tenets template |
 | `templates/SRS.md` | Software Requirements Specification template |
 | `templates/ADR-TEMPLATE.md` | Architecture Decision Record template |
+| `templates/statusline.sh` | Optional Claude Code status bar script — shows git, session, system, and active agent info |
 | `examples/CLAUDE.md` | A filled-in example showing what a configured project looks like |
 | `ADOPTING.md` | Guide for adding the agent stack to an existing project |
 
@@ -496,6 +497,120 @@ Anything in `settings.local.json` merges on top of `settings.json`. If a permiss
 ### Why not full yolo?
 
 Full `acceptEdits` or `dangerouslyDisableSandbox` modes remove all guardrails. Semi-yolo is a middle ground: agents run without interruption for routine work, but you still get prompted for anything unusual — new file locations, unfamiliar commands, or operations not in your allowlist. The deny list acts as a safety net even if an agent tries something destructive.
+
+## Agent status line (optional)
+
+The agent stack can display a live status bar in Claude Code showing git state, session info, system metrics, and which subagents are currently active. This is powered by two things:
+
+1. **`statusline.sh`** — a bash script that renders the status bar (reads from stdin JSON provided by Claude Code)
+2. **`.claude/agent-status.json`** — a runtime file in the project that tracks active subagent sessions
+
+### What it looks like
+
+```
+jasgr@machine:~/repos/myproject  myproject  ep-003-auth*  +2
+Opus 4.6  .  | ctx: 34% used | "main session" | 142.3kin 28.1kout | 5h:12%
+14:32  cpu:23%  mem:8.2/15.6G  disk:45%
+sa -> backend-developer (sonnet-4.6) TASK-003-002: user auth middleware [4m] | sa -> frontend-developer (sonnet-4.6) TASK-003-003: login page [2m]
+```
+
+Line 4 shows each active agent with who dispatched it, the model, the current task, and elapsed time. When no agents are running, it shows `-- no agents active --`. Dead sessions (where the PID no longer exists) are automatically pruned.
+
+### Setup
+
+**Step 1: Install the status line script**
+
+```bash
+cp templates/statusline.sh ~/.claude/statusline.sh
+chmod +x ~/.claude/statusline.sh
+```
+
+**Step 2: Tell Claude Code to use it**
+
+Add to your **user-level** `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_STATUS_LINE": "bash ~/.claude/statusline.sh"
+  }
+}
+```
+
+**Step 3: Allow the script in permissions**
+
+Add to your project's `.claude/settings.json` or `.claude/settings.local.json` allow list:
+
+```json
+"Bash(bash ~/.claude/statusline.sh)"
+```
+
+Or use the absolute path:
+
+```json
+"Bash(bash /home/YOU/.claude/statusline.sh)"
+```
+
+**Step 4: Gitignore the runtime file**
+
+Add to your project's `.gitignore`:
+
+```
+# Agent status (runtime state, not source)
+.claude/agent-status.json
+```
+
+**Step 5: Enable agent tracking in CLAUDE.md (optional)**
+
+If you want the SA to automatically update `agent-status.json` when dispatching subagents, uncomment the "Agent Status Line" section in your project's `CLAUDE.md`. This adds instructions for the SA to write agent entries before dispatch and clear them after.
+
+### How agent-status.json works
+
+The file is a multi-session dictionary keyed by session ID. Each entry tracks one active subagent:
+
+```json
+{
+  "session_abc123": {
+    "pid": 12345,
+    "agent": "backend-developer",
+    "model": "sonnet-4.6",
+    "goal": "TASK-003-002: implement user auth middleware",
+    "dispatched_by": "sa",
+    "status": "active",
+    "started": "2026-04-12T14:30:00Z"
+  },
+  "session_def456": {
+    "pid": 12399,
+    "agent": "frontend-developer",
+    "model": "sonnet-4.6",
+    "goal": "TASK-003-003: login page component",
+    "dispatched_by": "sa",
+    "status": "active",
+    "started": "2026-04-12T14:32:00Z"
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `pid` | Process ID of the Claude Code session (use `$PPID` from a Bash subprocess) |
+| `agent` | Role tag from the Agent Team table (e.g., `backend-developer`, `sdet`) |
+| `model` | Model name (e.g., `sonnet-4.6`, `opus-4.6`) |
+| `goal` | Current task or activity description |
+| `dispatched_by` | Who spawned this agent (e.g., `sa`, `main`) |
+| `status` | `active` or `idle` — the status line only shows `active` entries |
+| `started` | ISO 8601 timestamp — used to calculate elapsed time |
+
+**Protocol:**
+- **Before dispatch:** Read the file, add/update the session entry with `"status": "active"`, write it back
+- **After dispatch returns:** Set `"status": "idle"` or remove the entry entirely
+- **Always read-modify-write** — never overwrite the whole file, as concurrent sessions may have entries
+- **Never block on status writes** — if the write is rejected or fails, skip it and continue. The status line is cosmetic; it must never stall the workflow
+- **PID-based cleanup** — the statusline script automatically removes entries whose PID no longer exists in `/proc`, so stale entries from crashed sessions are cleaned up on the next render
+
+### Without agent tracking
+
+The status line works without `agent-status.json` — lines 1-3 (git, Claude session, system info) display regardless. Line 4 just shows `-- no agents active --`. You can install the script for the first three lines alone and add agent tracking later.
 
 ## Origin
 

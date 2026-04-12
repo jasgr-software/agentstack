@@ -83,6 +83,53 @@ Before marking any task as `review`, the developer agent **must** pass:
 - **RA gate (e2e)**: `TODO: full e2e suite command`
 - **CI gate**: `TODO: full CI command` (lint → type-check → build → all test suites)
 
+## Agent Status Line (optional)
+
+<!-- Uncomment this section if you've installed the statusline.sh script and want
+     the SA to update .claude/agent-status.json when dispatching subagents.
+     See the Agent Stack README § "Agent status line" for setup instructions. -->
+
+<!-- ### agent-status.json contract
+
+The file `.claude/agent-status.json` tracks active subagent sessions for the status bar.
+It is gitignored (runtime state, not source). The main session and SA must follow this protocol:
+
+**Before dispatching a subagent:**
+```python
+# Read-modify-write — never overwrite the whole file
+import json, os, subprocess
+from datetime import datetime, timezone
+
+status_file = ".claude/agent-status.json"
+sessions = {}
+if os.path.exists(status_file):
+    with open(status_file) as f:
+        sessions = json.load(f)
+
+session_id = "UNIQUE_ID"  # Use the subagent session ID or PID
+sessions[session_id] = {
+    "pid": int(subprocess.check_output(["echo", "$PPID"]).strip()),
+    "agent": "backend-developer",       # Role tag from Agent Team table
+    "model": "sonnet-4.6",              # Model used for this agent
+    "goal": "TASK-001-003: user auth",  # Current task description
+    "dispatched_by": "sa",              # Who spawned this agent
+    "status": "active",
+    "started": datetime.now(timezone.utc).isoformat()
+}
+
+with open(status_file, "w") as f:
+    json.dump(sessions, f, indent=2)
+```
+
+**After subagent returns:** Set `"status": "idle"` or remove the entry.
+
+**Rules:**
+- Always read-modify-write to preserve concurrent sessions
+- Never write a flat object — top-level must be a dict keyed by session ID
+- Status writes must never block workflow — if rejected/fails, skip and continue
+- Add `.claude/agent-status.json` to your `.gitignore`
+-->
+
 ## Role-Specific Rules
 
 <!-- Add project-specific constraints for individual agent roles here.
