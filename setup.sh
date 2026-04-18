@@ -20,8 +20,10 @@ usage() {
   echo "  agents/sa.md          → <target>/agents/sa.md"
   echo "  agents/developer.md   → <target>/agents/developer.md"
   echo "  agents/sdet.md        → <target>/agents/sdet.md"
-  echo "  templates/TASK-TEMPLATE.md → <target>/docs/tasks/TASK-TEMPLATE.md"
-  echo "  templates/BUG-TEMPLATE.md  → <target>/docs/tasks/BUG-TEMPLATE.md"
+  echo "  templates/TASK-TEMPLATE.md → <target>/docs/tasks/_TEMPLATE.md"
+  echo "  templates/BUG-TEMPLATE.md  → <target>/docs/tasks/_BUG_TEMPLATE.md"
+  echo "  hooks/log-*.py        → <target>/.claude/hooks/log-*.py"
+  echo "  scripts/metrics-report.py → <target>/scripts/metrics-report.py"
   echo ""
   echo "Project-managed files (only on first setup):"
   echo "  templates/CLAUDE.md   → <target>/CLAUDE.md"
@@ -37,6 +39,8 @@ usage() {
   echo "  templates/commands/status.md → <target>/.claude/commands/status.md"
   echo "  templates/commands/ra.md     → <target>/.claude/commands/ra.md"
   echo "  templates/commands/sa.md     → <target>/.claude/commands/sa.md"
+  echo "  templates/settings.json      → <target>/.claude/settings.json"
+  echo "  templates/metrics/.gitignore → <target>/.claude/metrics/.gitignore"
   exit 1
 }
 
@@ -72,8 +76,16 @@ UPSTREAM_FILES=(
   "agents/sa.md:agents/sa.md"
   "agents/developer.md:agents/developer.md"
   "agents/sdet.md:agents/sdet.md"
-  "templates/TASK-TEMPLATE.md:docs/tasks/TASK-TEMPLATE.md"
-  "templates/BUG-TEMPLATE.md:docs/tasks/BUG-TEMPLATE.md"
+  "templates/TASK-TEMPLATE.md:docs/tasks/_TEMPLATE.md"
+  "templates/BUG-TEMPLATE.md:docs/tasks/_BUG_TEMPLATE.md"
+  "hooks/log-tool-call.py:.claude/hooks/log-tool-call.py"
+  "hooks/log-notification.py:.claude/hooks/log-notification.py"
+  "hooks/log-stop.py:.claude/hooks/log-stop.py"
+  "hooks/log-dispatch.py:.claude/hooks/log-dispatch.py"
+  "hooks/log-session.py:.claude/hooks/log-session.py"
+  "hooks/log-task-edit.py:.claude/hooks/log-task-edit.py"
+  "hooks/log-tool-error.py:.claude/hooks/log-tool-error.py"
+  "scripts/metrics-report.py:scripts/metrics-report.py"
 )
 
 # Files that are only copied on first setup (project-managed)
@@ -91,6 +103,8 @@ PROJECT_FILES=(
   "templates/commands/status.md:.claude/commands/status.md"
   "templates/commands/ra.md:.claude/commands/ra.md"
   "templates/commands/sa.md:.claude/commands/sa.md"
+  "templates/settings.json:.claude/settings.json"
+  "templates/metrics/.gitignore:.claude/metrics/.gitignore"
 )
 
 if $DIFF_ONLY; then
@@ -131,6 +145,8 @@ echo ""
 # Create directories
 mkdir -p "$TARGET/.claude"
 mkdir -p "$TARGET/.claude/commands"
+mkdir -p "$TARGET/.claude/hooks"
+mkdir -p "$TARGET/.claude/metrics"
 mkdir -p "$TARGET/agents"
 mkdir -p "$TARGET/docs/tasks"
 mkdir -p "$TARGET/docs/tasks/done"
@@ -138,6 +154,7 @@ mkdir -p "$TARGET/docs/architecture"
 mkdir -p "$TARGET/docs/decisions"
 mkdir -p "$TARGET/docs/requirements"
 mkdir -p "$TARGET/docs/requirements/implemented"
+mkdir -p "$TARGET/scripts"
 
 # Copy upstream-managed files (always updated)
 for mapping in "${UPSTREAM_FILES[@]}"; do
