@@ -1,23 +1,65 @@
-# TASK-EEE-NNN — Short Description
+# TASK-NNN: Title
 
-**Epic:** ep-NNN
-**Status:** backlog
-**Assigned to:** <!-- developer role tag, e.g. backend-developer -->
-**Updated-by:** [sa]
-**Depends on:** none
-**E2e-required:** <!-- yes/no — set to yes for tasks touching auth flows, cross-service boundaries, CORS, cookies, or email -->
-**Priority:** <!-- high / medium / low -->
+**Epic**: EP-XXX
+**Status**: backlog
+**Assigned to**: — <!-- developer role, e.g. backend-developer | frontend-developer | devops -->
+**Updated-by**: —
+**Depends on**: none
+**E2e-required**: no
+**Started-at**: — <!-- ISO 8601 UTC, set when status first leaves backlog -->
+**Completed-at**: — <!-- ISO 8601 UTC, set in the atomic close edit when status → done -->
+**Complexity-estimate**: — <!-- 1-5 (1=very easy, 5=very hard), set when picking up the task, before reading implementation notes -->
+**Complexity-actual**: — <!-- 1-5, set when marking review based on actual effort -->
+
+<!--
+The four fields above are the Task Metadata Contract — see .claude/agent-stack.md
+§ Task Metadata Contract. SDET rejects review → done if Complexity-actual is missing
+or out of range. RA rejects epic close if any done task is missing any of the four.
+-->
 
 ---
 
+## Quality Gates
+
+<!--
+Tick each box as the gate passes. The developer ticks the first 4; the SDET
+ticks the SDET Review box on approval. **If a gate does not apply to this
+task, edit the literal text `[ ]` to `[N/A]` — do not leave it unticked.**
+Targeted e2e is N/A unless `E2e-required: yes`. The SDET walks this list as a
+checklist — every unticked Mandatory box is a rejection, including unticked
+boxes that should have been marked `[N/A]`. See `agents/sdet.md` § Review
+Process for the underlying rules.
+-->
+
+- [ ] **Work Log complete** — every status change has breadcrumbs (what done · what next · blockers)
+- [ ] **Submission gate** — lint + type-check + domain tests pass (commands from CLAUDE.md)
+- [ ] **Targeted e2e** — actual execution output in Work Log _(N/A unless `E2e-required: yes`)_
+- [ ] **Security review** — injection / XSS / auth bypass / sensitive data exposure verified
+- [ ] **SDET Review** — approved
+
+## SDET Review focus areas
+
+<!--
+Filled in by the SA at task creation. Examples:
+- "Touches middleware — verify HTTP security headers (CSP/HSTS/XFO/XCTO)"
+- "New route handler with form input — walk OWASP Top 10"
+- "New data access layer — verify parameterized queries / ORM usage"
+- "Touches Dockerfile or compose — verify ops docs updated"
+- "Adds new dependency — re-run dependency vulnerability scan"
+Leave blank only when none of the conditional SDET checks apply.
+-->
+
 ## Context
 
-<!-- Why this task exists. Reference SRS requirement IDs and C4 level where relevant. -->
+<!-- Why this task exists. Reference SRS requirement IDs and C4 level. -->
+
+**Affected flows**: <!-- flow-slug-1, flow-slug-2 (see docs/requirements/flows/) -->
+**Affected requirements**: <!-- REQ-XXX-001, REQ-XXX-002 -->
 
 ## Files to Create or Modify
 
 | File | Action | Responsibility |
-|------|--------|----------------|
+| ---- | ------ | -------------- |
 
 ## Tests to Write First
 
@@ -25,38 +67,24 @@
 
 ## Implementation Notes
 
-<!-- Guidance from the SA. Not implementation code — architectural hints, patterns to follow, gotchas. -->
+<!-- Guidance from the SA. Not implementation code. -->
 
 ## Definition of Done
 
-- [ ] <!-- Specific, verifiable acceptance criteria -->
-- [ ] Tests written and passing (TDD — tests first)
-- [ ] Submission gate passed (lint, type-check, tests)
+- [ ] All tests pass
+- [ ] Lint and type-check pass (commands from CLAUDE.md)
 - [ ] If E2e-required: yes — targeted e2e passes
-- [ ] Work Log updated with breadcrumbs
+- [ ] <!-- task-specific criteria -->
 
 ---
 
 ## Work Log
 
-<!-- Append entries here. Each entry must include: what was done, what's next, blockers -->
-
-### [role-tag] — YYYY-MM-DD
-
-**What was done:**
--
-
-**What's next:**
--
-
-**Blockers:**
-- None
+<!-- Format: - YYYY-MM-DD [role] What was done | What's next | Blockers -->
 
 ## Attempt Log
 
 **Attempt count**: 0
-
-<!-- After 2+ failed attempts, record what was tried, why it failed, and what was learned before retrying. -->
 
 ## SDET Review
 
