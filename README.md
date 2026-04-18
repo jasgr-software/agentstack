@@ -1,5 +1,7 @@
 # Agent Stack
 
+> Optimized for **Claude Opus 4.7**. The SA runs on Opus 4.7 by default — its extended context and multi-step reasoning are load-bearing for epic orchestration. Other agents (developers, SDET, RA, Overwatch) run on Sonnet 4.6. Earlier Opus versions (4.6, 4.5) work but yield noticeably weaker architectural reasoning and phase coordination.
+
 A structured multi-agent execution engine for Claude Code. It takes well-defined requirements and drives them to production-quality code by splitting work across specialised AI agents — architect, developers, reviewer, auditor — each with strict role boundaries, mandatory quality gates, and file-based memory that survives session interruptions. The workflow enforces TDD, submission gates, independent code review, and escalation protocols so that Claude Code operates with the same discipline as a well-run engineering team. Technology-agnostic: define your stack, commands, and directory structure in `CLAUDE.md` and the workflow adapts.
 
 ## When to use this (and when not to)
