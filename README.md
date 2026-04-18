@@ -45,9 +45,11 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 | `agents/sdet.md` | SDET / Validator agent — reviews code, runs tests independently, approves or rejects |
 | `agents/overwatch.md` | Read-only auditor agent that monitors for rule violations and scope creep |
 | `templates/CLAUDE.md` | Skeleton project CLAUDE.md with TODO placeholders for your stack |
-| `templates/TASK-TEMPLATE.md` | Task file template used by the SA when breaking down epics |
-| `templates/BUG-TEMPLATE.md` | Bug report template used by the SDET when rejecting tasks |
-| `templates/PROGRESS.md` | Shared progress tracker — fixed 5-section structure with quality gates checklist |
+| `templates/TASK-TEMPLATE.md` | Task file template (copied to `docs/tasks/_TEMPLATE.md`) — includes Task Metadata Contract fields, Quality Gates checklist, SDET Review focus areas, and Affected flows/requirements |
+| `templates/BUG-TEMPLATE.md` | Bug report template (copied to `docs/tasks/_BUG_TEMPLATE.md`) — same gate structure as tasks |
+| `templates/PROGRESS.md` | Shared progress tracker — fixed 5-section structure |
+| `templates/settings.json` | Starter `.claude/settings.json` with hooks wired up and a deny list for destructive git ops. Customise with your project's `Write`/`Edit`/`Bash` allowlist. |
+| `templates/metrics/.gitignore` | Keeps `.jsonl` metric files out of git |
 | `templates/commands/status.md` | Quick status command — reads PROGRESS.md, lists tasks, shows git state |
 | `templates/commands/ra.md` | RA spawn shortcut — invokes the Requirements Analyst with standard context |
 | `templates/commands/sa.md` | SA spawn shortcut — invokes the System Architect with standard context |
@@ -60,6 +62,8 @@ The value isn't in the agent orchestration mechanics — it's in the discipline 
 | `templates/SRS.md` | Software Requirements Specification template |
 | `templates/ADR-TEMPLATE.md` | Architecture Decision Record template |
 | `templates/statusline.sh` | Optional Claude Code status bar script — shows git, session, system, and active agent info |
+| `hooks/log-*.py` | Seven metrics hooks (copied to `.claude/hooks/`) — capture tool calls, notifications, pauses, dispatch events, session boundaries, task edits, and tool errors to `.claude/metrics/*.jsonl` |
+| `scripts/metrics-report.py` | Per-task metrics report — joins dispatch + task + session streams into a markdown table with cost, rework, complexity drift, cache hit ratio |
 | `examples/CLAUDE.md` | A filled-in example showing what a configured project looks like |
 | `ADOPTING.md` | Guide for adding the agent stack to an existing project |
 
@@ -152,8 +156,8 @@ The scripts distinguish between two categories of files:
 
 | Category | Files | On upgrade |
 |----------|-------|-----------|
-| **Upstream-managed** | `.claude/agent-stack.md`, `.claude/agent-phases.md`, `agents/*.md` (all agent files), `docs/tasks/TASK-TEMPLATE.md`, `docs/tasks/BUG-TEMPLATE.md` | Always updated to latest |
-| **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4*.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md`, `.claude/commands/*.md` | Never overwritten (your project config) |
+| **Upstream-managed** | `.claude/agent-stack.md`, `.claude/agent-phases.md`, `agents/*.md` (all agent files), `docs/tasks/_TEMPLATE.md`, `docs/tasks/_BUG_TEMPLATE.md`, `.claude/hooks/log-*.py`, `scripts/metrics-report.py` | Always updated to latest |
+| **Project-managed** | `CLAUDE.md`, `docs/tasks/PROGRESS.md`, `docs/architecture/C4*.md`, `docs/architecture/TENETS.md`, `docs/requirements/SRS.md`, `docs/decisions/ADR-TEMPLATE.md`, `.claude/commands/*.md`, `.claude/settings.json`, `.claude/metrics/.gitignore` | Never overwritten (your project config) |
 
 The output tells you what happened to each file:
 - `+` new file created
@@ -352,16 +356,25 @@ your-project/
 ├── .claude/
 │   ├── agent-stack.md                 # Workflow engine (upstream-managed)
 │   ├── agent-phases.md                # SA-only phase reference (upstream-managed)
-│   └── commands/
-│       ├── status.md                  # /status — quick progress check
-│       ├── ra.md                      # /ra — invoke Requirements Analyst
-│       └── sa.md                      # /sa — invoke System Architect
+│   ├── settings.json                  # Permissions + hooks config (project-managed)
+│   ├── commands/
+│   │   ├── status.md                  # /status — quick progress check
+│   │   ├── ra.md                      # /ra — invoke Requirements Analyst
+│   │   └── sa.md                      # /sa — invoke System Architect
+│   ├── hooks/                         # Metrics capture hooks (upstream-managed)
+│   │   ├── log-tool-call.py
+│   │   ├── log-dispatch.py
+│   │   ├── log-task-edit.py
+│   │   └── ...
+│   └── metrics/                       # Auto-generated .jsonl files (gitignored)
 ├── agents/
 │   ├── ra.md                          # Requirements Analyst (upstream-managed)
 │   ├── sa.md                          # System Architect (upstream-managed)
 │   ├── developer.md                   # Developer template (upstream-managed)
 │   ├── sdet.md                        # SDET / Validator (upstream-managed)
 │   └── overwatch.md                   # Auditor agent (upstream-managed)
+├── scripts/
+│   └── metrics-report.py              # Per-task cost/rework/complexity report
 └── docs/
     ├── architecture/
     │   ├── C4.md                      # C4 model index
@@ -375,12 +388,12 @@ your-project/
     ├── requirements/
     │   ├── SRS.md                     # Software Requirements Specification
     │   ├── ep-001-first-epic.md       # (created by RA)
-    │   └── implemented/                # Completed epics move here
+    │   └── implemented/               # Completed epics move here
     └── tasks/
-        ├── TASK-TEMPLATE.md           # Template for new tasks
-        ├── BUG-TEMPLATE.md            # Template for bug reports
+        ├── _TEMPLATE.md               # Template for new tasks
+        ├── _BUG_TEMPLATE.md           # Template for bug reports
         ├── PROGRESS.md                # SA/RA/SDET progress tracker
-        ├── TASK-001-001-some-task.md   # (created by SA during Plan)
+        ├── TASK-001-001-some-task.md  # (created by SA during Plan)
         └── done/                      # Completed tasks move here
 ```
 
@@ -392,63 +405,11 @@ The agent stack spawns multiple subagents that run shell commands, read/write fi
 
 ### How to configure
 
-Create or edit `.claude/settings.json` in your project:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Read",
-      "Glob",
-      "Grep",
-      "Agent",
-      "TaskCreate",
-      "TaskUpdate",
-      "TaskGet",
-      "TaskList",
-      "TaskOutput",
-      "TaskStop",
-      "Skill",
-      "EnterPlanMode",
-      "ExitPlanMode",
-      "WebSearch",
-      "WebFetch",
-      "Write(docs/**)",
-      "Write(agents/**)",
-      "Write(CLAUDE.md)",
-      "Edit(docs/**)",
-      "Edit(agents/**)",
-      "Edit(CLAUDE.md)",
-      "Bash(git:*)",
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(wc:*)",
-      "Bash(echo:*)",
-      "Bash(mkdir:*)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(grep:*)",
-      "Bash(diff:*)",
-      "Bash(which:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)"
-    ],
-    "deny": [
-      "Bash(git push --force*)",
-      "Bash(git push -f*)",
-      "Bash(git reset --hard*)",
-      "Bash(git clean -fd*)",
-      "Bash(rm -rf /home*)",
-      "Bash(rm -rf /*)"
-    ]
-  }
-}
-```
+The setup script copies `templates/settings.json` to `.claude/settings.json` in your project on first setup. That file includes the metrics hooks wired up and a baseline deny list. Edit it to add your project's tech stack permissions.
 
 ### What to customize
 
-The example above covers workflow operations (docs, agents, task tracking) and common shell tools. You'll want to add entries for your project's tech stack:
+The starter config covers workflow operations (docs, agents) and common shell tools. You'll want to add entries for your project's tech stack:
 
 **Source code write access** — add `Write` and `Edit` patterns for your application directories:
 ```json
